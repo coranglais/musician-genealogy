@@ -1,0 +1,78 @@
+id,last_name,first_name,birth_date,death_date,nationality,instrument,bio_notes,confidence
+1,Gillet,Georges,1854,1920,French,Oboe,Professor at Paris Conservatoire. Established the French school of oboe playing.,high
+2,Longy,Georges,,,French,Oboe,Principal oboe BSO. Founded Longy School of Music.,high
+3,Barret,A.M.R.,,,French,Oboe,,medium
+4,Tabuteau,Marcel,1887,1966,French-American,Oboe,"Principal oboe Philadelphia Orchestra (1915-1954). Professor Curtis Institute. Founder of American school of oboe playing.",high
+5,de Lancie,John,1921,2002,American,Oboe,"Principal oboe Philadelphia Orchestra (1954-1977). Director of Curtis. Commissioned Strauss Oboe Concerto.",high
+6,Bloom,Robert,1908,1976,American,Oboe,"Principal oboe multiple orchestras. Pedagogue at Yale and Juilliard. Championed Bach cantatas.",high
+7,Mack,John,1927,2006,American,Oboe,"Principal oboe Cleveland Orchestra (1965-2001). One of the most influential oboe teachers of late 20th century.",high
+8,Gomberg,Harold,1916,1985,American,Oboe,"Principal oboe NY Philharmonic (1943-1977).",high
+9,Gomberg,Ralph,1921,2006,American,Oboe,"Principal oboe BSO (1950-1987).",high
+10,Lifschey,Marc,1926,2000,American,Oboe,"Principal oboe Cleveland Orchestra, SF Symphony, Met Opera.",high
+11,Rapier,Wayne,1938,,American,Oboe,"Principal oboe BSO (intermittently). Faculty NEC.",medium
+12,Storch,Laila,1921,2012,American,Oboe,"Author of definitive Tabuteau biography. Faculty U of Washington.",high
+13,Angelucci,Radames,,,,Oboe,"Also known as John. 1930s Tabuteau student. Principal oboe Minneapolis/Minnesota Symphony (1936-1980+).",medium
+14,Criss,Bill,,,,Oboe,Tabuteau student.,low
+15,Still,Ray,,,,American,Oboe,Principal oboe Chicago Symphony.,high
+16,Killmer,Richard,,,,American,Oboe,Faculty Eastman School of Music.,high
+17,Woodhams,Richard,1949,,American,Oboe,"Principal oboe Philadelphia Orchestra (1977-2016). Third generation Curtis oboe teacher.",high
+18,Douvas,Elaine,1952,,American,Oboe,"Principal oboe Met Opera. Faculty Juilliard.",high
+19,Robinson,Joseph,1940,,American,Oboe,"Principal oboe NY Philharmonic (1978-2005).",high
+20,Ferrillo,John,,,,American,Oboe,"Principal oboe BSO. Author of instructional excerpt manual. Faculty NEC.",high
+21,Taylor,Steven,,,,American,Oboe,"Faculty Yale. Soloist and chamber musician.",medium
+22,Atherholt,Bob,,,,American,Oboe,Faculty Rice University Shepherd School.,medium
+23,Vogel,Alan,,,,American,Oboe,"DMA Yale. Faculty USC Thornton.",medium
+24,Caldwell,James,,,,American,Oboe,Faculty Oberlin.,medium
+25,Walters,Robert,,,,American,Oboe,"Curtis grad. Faculty Oberlin.",medium
+26,Diaz,Pedro,,,,American,Oboe,Faculty Juilliard.,medium
+27,Hughes,Nathan,,,,American,Oboe,Faculty Juilliard.,medium
+28,King,Nancy Ambrose,,,,American,Oboe,"Competition winner and soloist. Recovered from car accident in 1980s. Faculty U of Michigan.",medium
+29,Rosenwein,Frank,,,,American,Oboe,Principal oboe Cleveland Orchestra.,medium
+30,Needleman,Katherine,,,,American,Oboe,Curtis faculty. Fourth generation from Tabuteau.,medium
+31,Tondre,Philip,,,,French,Oboe,"Curtis faculty. Studied with Bourgue, Walter, Holliger. European-American reunification.",medium
+32,Stovall,Nicholas,,,,American,Oboe,Principal oboe National Symphony Orchestra. Faculty Peabody.,medium
+33,Underwood,Titus,,,,American,Oboe,"Faculty Cincinnati Conservatory. ~8 teachers across 4 institutions.",medium
+34,Henoch,Michael,,,,American,Oboe,"Assistant principal oboe CSO. Faculty Northwestern.",medium
+35,Stroman,Linda,,,,American,Oboe,"Faculty Indiana U, also Juilliard and LSU.",medium
+36,Hill,Mark,,,,American,Oboe,Faculty U of Maryland.,medium
+37,Cooper,Peter,,,,American,Oboe,"Principal oboe Colorado Symphony. Faculty CU Boulder.",medium
+38,Izotov,Eugene,,,,Russian-American,Oboe,Faculty SF Conservatory.,medium
+39,Kuszyk,Marion,,,,American,Oboe,,low
+40,Hannigan,Erin,,,,American,Oboe,"Principal oboe Dallas Symphony. Faculty SMU.",medium
+41,Henderson,Rebecca,,,,American,Oboe,"Former faculty UT Austin. Daughter of Richard Henderson.",medium
+42,Lucarelli,Humbert,,,,American,Oboe,Faculty Hartt School.,medium
+43,Marvine,Jane,,,,American,Oboe,All positions Baltimore Symphony.,medium
+44,Sylar,Sherry,,,,American,Oboe,Faculty Manhattan School of Music.,medium
+45,Smith,James Austin,,,,American,Oboe,Faculty Manhattan School of Music.,medium
+46,Parker,Andrew,,,,American,Oboe,Faculty UT Austin.,medium
+47,Lichtenwalter,Jason,,,,American,Oboe,"English horn Colorado Symphony. Faculty CU Boulder.",medium
+48,Derosa,Julia,,,,American,Oboe,"Broadway and symphonic. Faculty Mannes.",medium
+49,Roberts,Ryan,,,,American,Oboe,"English horn NY Phil. Faculty Mannes.",medium
+50,Spelman Diaz,Toyin,,,,American,Oboe,"Chamber and new music. Faculty Mannes.",medium
+51,Walter,David,,,,French,Oboe,Paris Conservatoire faculty.,medium
+52,Bourgue,Maurice,,,,French,Oboe,,medium
+53,Holliger,Heinz,,,,Swiss,Oboe,,high
+54,Gower,William,,,,American,Oboe,"Faculty UNC (formerly Colorado State College).",low
+55,Henderson,Richard,,,,American,Oboe,El Paso Symphony.,low
+56,Mariotti,Arno,,,,American,Oboe,"Faculty U of Michigan.",low
+57,Sargous,Harry,,,,American,Oboe,Faculty U of Michigan.,low
+58,Wann,Louis,,,,American,Oboe,,low
+59,Roseman,Ronald,,,,American,Oboe,,low
+60,Elliot,Gladys,,,,American,Oboe,One of first women in a major symphony orchestra.,low
+61,Rathbun,Jeff,,,,American,Oboe,CIM faculty.,low
+62,Gabriele,Anne Marie,,,,American,Oboe,,low
+63,Colburn,Steven,,,,American,Oboe,,low
+64,Turner,Joseph,,,,American,Oboe,,low
+65,Wetzel,Christian,,,,German,Oboe,,low
+66,Koch,Lothar,,,,German,Oboe,Berlin Philharmonic.,medium
+67,Gillet,Fernand,,,,French,Oboe,,low
+68,Marx,Josef,,,,American,Oboe,,low
+69,Stolper,Dan,,,,American,Oboe,Interlochen.,low
+70,McCoy,Robert W.,,,,American,Oboe,"Oberlin faculty ~1950s.",low
+71,Humiston,Robert,,,,American,Oboe,"Western Michigan U faculty. Studied with McCoy at Oberlin.",low
+72,Randall,Darrel,,,,American,Oboe,,low
+73,Velikanov,Sergei,,,,Russian,Oboe,,low
+74,Izotov,Alexander,,,,Russian,Oboe,Likely family of Eugene.,low
+75,Dlouhy,Jonathan,,,,American,Oboe,,low
+76,Sherr,David,,,,American,Oboe,,low
+77,Deluna,Russ,,,,American,Oboe,Faculty SF Conservatory.,low

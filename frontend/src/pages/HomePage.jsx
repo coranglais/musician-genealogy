@@ -1,0 +1,75 @@
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import SearchBar from '../components/SearchBar'
+import { listMusicians } from '../api'
+
+const FEATURED = [
+  { id: 4, name: 'Marcel Tabuteau', desc: 'Founder of the American school of oboe' },
+  { id: 1, name: 'Georges Gillet', desc: 'Father of the French oboe school' },
+  { id: 5, name: 'John de Lancie', desc: 'Curtis lineage, Philadelphia Orchestra' },
+  { id: 7, name: 'John Mack', desc: 'Cleveland Orchestra, legendary pedagogue' },
+]
+
+export default function HomePage() {
+  const [recentMusicians, setRecentMusicians] = useState([])
+
+  useEffect(() => {
+    listMusicians({ per_page: 12 }).then(setRecentMusicians).catch(() => {})
+  }, [])
+
+  return (
+    <div>
+      <section className="py-12 text-center">
+        <h1 className="text-4xl font-bold text-stone-800 mb-3">
+          Musician Genealogy
+        </h1>
+        <p className="text-lg text-stone-500 mb-8 max-w-xl mx-auto">
+          Explore pedagogical lineages — who studied with whom, where, and when.
+        </p>
+        <div className="mx-auto max-w-lg">
+          <SearchBar autoFocus />
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <h2 className="text-xl font-semibold text-stone-700 mb-4">Featured Lineages</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {FEATURED.map(f => (
+            <Link
+              key={f.id}
+              to={`/musician/${f.id}`}
+              className="rounded-lg border border-stone-200 bg-white p-5 shadow-sm
+                hover:border-amber-300 hover:shadow-md transition-all"
+            >
+              <h3 className="font-semibold text-stone-800">{f.name}</h3>
+              <p className="mt-1 text-sm text-stone-500">{f.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="text-xl font-semibold text-stone-700 mb-4">Browse Musicians</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {recentMusicians.map(m => (
+            <Link
+              key={m.id}
+              to={`/musician/${m.id}`}
+              className="rounded-md border border-stone-200 bg-white px-4 py-3
+                hover:border-amber-300 hover:bg-amber-50/30 transition-all text-sm"
+            >
+              <span className="font-medium text-stone-800">
+                {m.first_name} {m.last_name}
+              </span>
+              {m.birth_date && (
+                <span className="ml-2 text-stone-400">
+                  ({m.birth_date}{m.death_date ? `–${m.death_date}` : ''})
+                </span>
+              )}
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}

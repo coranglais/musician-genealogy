@@ -1,0 +1,99 @@
+teacher_id,teacher_name,student_id,student_name,institution_id,institution_name,relationship_type,start_year,end_year,notes,confidence
+1,Gillet,3,Barret,1,Paris Conservatoire,formal_study,,,,medium
+1,Gillet,2,Longy,1,Paris Conservatoire,formal_study,,,,medium
+1,Gillet,4,Tabuteau,1,Paris Conservatoire,formal_study,,,,high
+4,Tabuteau,5,de Lancie,2,Curtis,formal_study,,,,high
+4,Tabuteau,7,Mack,2,Curtis,formal_study,,,,high
+4,Tabuteau,6,Bloom,2,Curtis,formal_study,,,,high
+4,Tabuteau,10,Lifschey,2,Curtis,formal_study,,,,high
+4,Tabuteau,8,H. Gomberg,2,Curtis,formal_study,,,,high
+4,Tabuteau,9,R. Gomberg,2,Curtis,formal_study,,,,high
+4,Tabuteau,11,Rapier,2,Curtis,formal_study,,,,high
+4,Tabuteau,12,Storch,2,Curtis,formal_study,,,,high
+4,Tabuteau,13,Angelucci,,,,formal_study,,,,medium
+4,Tabuteau,14,Criss,,,,formal_study,,,,low
+5,de Lancie,17,Woodhams,2,Curtis,formal_study,,,,high
+5,de Lancie,20,Ferrillo,2,Curtis,formal_study,,,,high
+5,de Lancie,24,Caldwell,2,Curtis,formal_study,,,,high
+5,de Lancie,25,Walters,2,Curtis,formal_study,,,,high
+6,Bloom,15,Still,,,,formal_study,,,,high
+6,Bloom,16,Killmer,,,,formal_study,,,,medium
+6,Bloom,22,Atherholt,3,Juilliard,formal_study,,,,medium
+6,Bloom,21,Taylor,,,,formal_study,,,,medium
+6,Bloom,23,Vogel,,,,formal_study,,,,medium
+6,Bloom,35,Stroman,,,,formal_study,,,,medium
+6,Bloom,43,Marvine,,,,formal_study,,,,medium
+7,Mack,18,Douvas,,,,formal_study,,,,high
+7,Mack,19,Robinson,,,,formal_study,,,,high
+7,Mack,25,Walters,,,,formal_study,,,,medium
+7,Mack,32,Stovall,19,CIM,formal_study,,,,medium
+7,Mack,29,Rosenwein,19,CIM,formal_study,,,,medium
+7,Mack,33,Underwood,19,CIM,formal_study,,,,medium
+7,Mack,35,Stroman,,,,formal_study,,,,medium
+7,Mack,43,Marvine,,,,formal_study,,,,medium
+7,Mack,42,Lucarelli,,,,formal_study,,,,medium
+9,R. Gomberg,38,Izotov,,,,formal_study,,,,medium
+9,R. Gomberg,77,Deluna,,,,formal_study,,,,medium
+10,Lifschey,43,Marvine,,,,formal_study,,,,medium
+15,Still,34,Henoch,,,,formal_study,,,,medium
+15,Still,35,Stroman,,,,formal_study,,,,medium
+15,Still,37,Cooper,,,,formal_study,,,,medium
+15,Still,43,Marvine,,,,formal_study,,,,medium
+15,Still,44,Sylar,,,,formal_study,,,,medium
+15,Still,45,J.A. Smith,,,,formal_study,,,,medium
+15,Still,77,Deluna,,,,formal_study,,,,medium
+54,Gower,16,Killmer,23,UNC,formal_study,,,Undergraduate,medium
+55,R. Henderson,16,Killmer,31,El Paso Symphony,informal,,,Concurrent study while both played there,medium
+58,Wann,21,Taylor,,,,formal_study,,,,low
+16,Killmer,28,King,5,Eastman,formal_study,,,,high
+16,Killmer,39,Kuszyk,,,,formal_study,,,,medium
+16,Killmer,46,Parker,5,Eastman,formal_study,,,,medium
+16,Killmer,47,Lichtenwalter,,,,formal_study,,,,medium
+16,Killmer,41,Henderson,5,Eastman,formal_study,,,,medium
+17,Woodhams,30,Needleman,2,Curtis,formal_study,,,,medium
+17,Woodhams,35,Stroman,,,,formal_study,,,,medium
+17,Woodhams,33,Underwood,,,,formal_study,,,,medium
+18,Douvas,26,Diaz,3,Juilliard,formal_study,,,,high
+18,Douvas,27,Hughes,3,Juilliard,formal_study,,,,high
+18,Douvas,48,Derosa,3,Juilliard,formal_study,,,,medium
+18,Douvas,49,Roberts,3,Juilliard,formal_study,,,,medium
+18,Douvas,32,Stovall,3,Juilliard,formal_study,,,,medium
+18,Douvas,33,Underwood,3,Juilliard,formal_study,,,,medium
+18,Douvas,29,Rosenwein,,,,formal_study,,,,medium
+19,Robinson,33,Underwood,,,,formal_study,,,,medium
+21,Taylor,45,J.A. Smith,,,,formal_study,,,,medium
+22,Atherholt,33,Underwood,,,,formal_study,,,,medium
+23,Vogel,33,Underwood,22,Colburn,formal_study,,,,medium
+24,Caldwell,50,Spelman Diaz,8,Oberlin,formal_study,,,,medium
+24,Caldwell,39,Kuszyk,,,,formal_study,,,,medium
+24,Caldwell,47,Lichtenwalter,,,,formal_study,,,,medium
+26,Diaz,49,Roberts,3,Juilliard,formal_study,,,,medium
+26,Diaz,33,Underwood,3,Juilliard,formal_study,,,,medium
+27,Hughes,49,Roberts,3,Juilliard,formal_study,,,,medium
+27,Hughes,32,Stovall,3,Juilliard,formal_study,,,,medium
+27,Hughes,33,Underwood,3,Juilliard,formal_study,,,,medium
+28,King,46,Parker,10,U of Michigan,formal_study,,,,medium
+56,Mariotti,28,King,10,U of Michigan,formal_study,,,,medium
+57,Sargous,28,King,10,U of Michigan,formal_study,,,,medium
+61,Rathbun,33,Underwood,19,CIM,formal_study,,,,medium
+62,Gabriele,33,Underwood,,,,formal_study,,,,medium
+63,Colburn,35,Stroman,,,,formal_study,,,,low
+64,Turner,43,Marvine,,,,formal_study,,,,medium
+65,Wetzel,45,J.A. Smith,,,,formal_study,,,,medium
+42,Lucarelli,45,J.A. Smith,,,,formal_study,,,,medium
+59,Roseman,36,Hill,,,,formal_study,,,,medium
+60,Elliot,37,Cooper,,,,formal_study,,,,medium
+73,Velikanov,38,Izotov,,,,formal_study,,,,medium
+74,A. Izotov,38,Izotov,,,,formal_study,,,,medium
+75,Dlouhy,77,Deluna,,,,formal_study,,,,low
+70,McCoy,71,Humiston,8,Oberlin,formal_study,,,,low
+51,Walter,31,Tondre,,,,formal_study,,,,medium
+52,Bourgue,31,Tondre,,,,formal_study,,,,medium
+53,Holliger,31,Tondre,,,,formal_study,,,,medium
+66,Koch,23,Vogel,,,informal,,,Fulbright fellowship in Berlin,high
+67,F. Gillet,23,Vogel,,,informal,,,Worked with,low
+68,Marx,23,Vogel,,,informal,,,Worked with,low
+53,Holliger,36,Hill,,,informal,,,Mentor,medium
+16,Killmer,36,Hill,,,informal,,,Mentor,medium
+19,Robinson,36,Hill,,,informal,,,Mentor,medium
+72,Randall,36,Hill,,,informal,,,Mentor,low
