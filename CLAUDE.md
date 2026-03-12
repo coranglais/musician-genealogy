@@ -97,6 +97,10 @@ Frontend dev server proxies `/api` requests to `http://127.0.0.1:8000`.
 - Phase 3: Submission form UI, admin review queue, responsive design — not started
 - Phase 4: SEO, Open Graph, analytics — not started
 
+## Future Ideas
+
+- **"What's New" changelog widget** — Bake git commit messages into a JSON file at Docker build time, run them through the Claude API to rewrite as friendly non-technical changelog entries (e.g., "Fix autocomplete dropdown text color contrast" → "Improved readability of search suggestions"). Costs nothing at runtime since it only runs once per deploy. Needs ANTHROPIC_API_KEY at build time. Good Phase 4 candidate.
+
 # Git Conventions
 - Commit messages use imperative mood (e.g., "Add search endpoint" not "Added search endpoint")
 - First line: concise summary under 72 characters
