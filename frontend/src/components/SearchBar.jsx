@@ -95,7 +95,7 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
               <button
                 type="button"
                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors
-                  ${i === activeIndex ? 'bg-amber-50 text-amber-900' : 'hover:bg-stone-50'}`}
+                  ${i === activeIndex ? 'bg-amber-50 text-amber-900' : 'text-stone-800 hover:bg-stone-50'}`}
                 onMouseEnter={() => setActiveIndex(i)}
                 onClick={() => {
                   navigate(`/musician/${s.musician_id}`)
