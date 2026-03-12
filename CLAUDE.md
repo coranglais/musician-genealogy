@@ -34,6 +34,9 @@ frontend/
     components/      # Layout, SearchBar, MusicianCard
   vite.config.js     # Tailwind plugin + API proxy to :8000
 seed-musicians.csv, seed-institutions.csv, seed-lineage.csv
+Dockerfile               # Multi-stage: builds frontend, then Python production image
+railway.toml              # Railway deployment config
+start.sh                  # Entrypoint: alembic upgrade, seed, uvicorn
 ```
 
 ## Running Locally
@@ -72,11 +75,20 @@ Frontend dev server proxies `/api` requests to `http://127.0.0.1:8000`.
 - `musician_names` table is for legitimate alternate names (transliterations, maiden names), NOT misspellings.
 - Unique constraint on lineage: `(teacher_id, student_id, institution_id)`.
 
+## Deployment (Railway)
+
+- Multi-stage Dockerfile: Node 22 builds frontend, Python 3.12-slim runs backend
+- `start.sh` runs alembic migrations + seed data + uvicorn on every deploy
+- Frontend dist is copied to `backend/static/` and served by FastAPI's StaticFiles + SPA catch-all
+- Railway provides `PORT` env var; uvicorn binds to `0.0.0.0:$PORT`
+- Health check: `GET /api/v1/health`
+
 ## Environment Variables
 
-- `DATABASE_URL` — defaults to `sqlite:///./musician_genealogy.db`
-- `ADMIN_PASSWORD` — defaults to `admin`
-- `CORS_ORIGINS` — defaults to `http://localhost:5173`
+- `DATABASE_URL` — defaults to `sqlite:///./musician_genealogy.db` (set by Railway Postgres plugin)
+- `ADMIN_PASSWORD` — defaults to `admin` (set a real one in Railway)
+- `CORS_ORIGINS` — defaults to `http://localhost:5173` (not needed in production, same-origin)
+- `PORT` — set by Railway automatically
 
 ## Phase Status
 

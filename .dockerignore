@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+*.pyo
+*.db
+.git
+.gitignore
+*.md
+frontend/node_modules
+frontend/dist
+backend/musician_genealogy.db
