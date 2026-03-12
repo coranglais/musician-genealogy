@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getMusician, getMusicianTeachers, getMusicianStudents } from '../api'
+import LineageTree from '../components/LineageTree'
 
 function formatDates(m) {
   if (!m.birth_date && !m.death_date) return null
@@ -99,10 +100,12 @@ export default function MusicianDetail() {
 
   const dates = formatDates(musician)
   const instruments = musician.musician_instruments?.map(mi => mi.instrument.name) || []
+  const musicianName = `${musician.first_name} ${musician.last_name}`
 
   return (
     <div>
-      <div className="mb-8">
+      {/* Header */}
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-stone-800">
           {musician.first_name} {musician.last_name}
         </h1>
@@ -118,7 +121,7 @@ export default function MusicianDetail() {
       </div>
 
       {musician.bio_notes && (
-        <section className="mb-8">
+        <section className="mb-6">
           <div className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
             <p className="text-stone-700 leading-relaxed">{musician.bio_notes}</p>
           </div>
@@ -126,7 +129,7 @@ export default function MusicianDetail() {
       )}
 
       {musician.alternate_names?.length > 0 && (
-        <section className="mb-8">
+        <section className="mb-6">
           <h2 className="text-lg font-semibold text-stone-700 mb-3">Also Known As</h2>
           <div className="flex flex-wrap gap-2">
             {musician.alternate_names.map(an => (
@@ -139,33 +142,41 @@ export default function MusicianDetail() {
         </section>
       )}
 
-      {teachers.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-stone-700 mb-3">
-            Teachers
-            <span className="ml-2 text-sm font-normal text-stone-400">({teachers.length})</span>
-          </h2>
-          <div className="space-y-2">
-            {teachers.map(t => (
-              <LineageItem key={t.id} lineage={t} role="teacher" />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Lineage Tree — the centerpiece */}
+      <section className="mb-8">
+        <LineageTree musicianId={parseInt(id)} musicianName={musicianName} />
+      </section>
 
-      {students.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-stone-700 mb-3">
-            Students
-            <span className="ml-2 text-sm font-normal text-stone-400">({students.length})</span>
-          </h2>
-          <div className="space-y-2">
-            {students.map(s => (
-              <LineageItem key={s.id} lineage={s} role="student" />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Detailed lineage lists */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {teachers.length > 0 && (
+          <section>
+            <h2 className="text-lg font-semibold text-stone-700 mb-3">
+              Teachers
+              <span className="ml-2 text-sm font-normal text-stone-400">({teachers.length})</span>
+            </h2>
+            <div className="space-y-2">
+              {teachers.map(t => (
+                <LineageItem key={t.id} lineage={t} role="teacher" />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {students.length > 0 && (
+          <section>
+            <h2 className="text-lg font-semibold text-stone-700 mb-3">
+              Students
+              <span className="ml-2 text-sm font-normal text-stone-400">({students.length})</span>
+            </h2>
+            <div className="space-y-2">
+              {students.map(s => (
+                <LineageItem key={s.id} lineage={s} role="student" />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
 
       {teachers.length === 0 && students.length === 0 && (
         <div className="rounded-lg border border-stone-200 bg-white p-8 text-center">

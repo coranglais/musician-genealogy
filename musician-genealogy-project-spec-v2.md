@@ -607,6 +607,7 @@ musician-genealogy/
 - DATABASE_URL (Railway Postgres)
 - SECRET_KEY (session/token signing)
 - ADMIN_PASSWORD (simple admin auth)
+- ANTHROPIC_API_KEY (for AI-assisted submissions and admin research, Phase 3)
 - CORS_ORIGINS (dev only; production same-origin)
 
 Railway provides custom domains with automatic HTTPS via Let's Encrypt.
@@ -630,8 +631,10 @@ Railway provides custom domains with automatic HTTPS via Let's Encrypt.
 - Visual weight by relationship type (solid/dashed/dotted)
 - Show all connections toggle
 
-### Phase 3: Community and Polish
+### Phase 3: Community, AI-Assisted Submissions, and Polish
 - Submission form (public), admin review queue, status tracking
+- AI-assisted free-text submission parsing (see AI-Assisted Features below)
+- AI-assisted admin research tool (see AI-Assisted Features below)
 - Responsive design
 - Institution detail pages with historical names
 - Source citations on lineage relationships
@@ -644,6 +647,61 @@ Railway provides custom domains with automatic HTTPS via Let's Encrypt.
 - Import pianist genealogy data (if permission obtained)
 - Add violin, flute, clarinet, etc.
 - Trusted contributor role, bulk import tools
+
+---
+
+## AI-Assisted Features (Phase 3)
+
+The Anthropic API is used in two places to reduce friction for both community contributors and editors. In both cases, AI suggests and humans approve — nothing AI-generated touches the live database without editorial review.
+
+### Smart Submission Form (Public-Facing)
+
+Instead of requiring structured field entry, the submission form offers a free-text box: "Tell us about your music education." The user types naturally, e.g.:
+
+"I studied with John Mack at CIM from 1990 to 1994, and took masterclasses with Holliger at the Lucerne Festival in the summers."
+
+A Claude API call (Haiku model) parses this into structured candidate records:
+- Lineage 1: teacher=John Mack, student=[submitter], institution=CIM, type=formal_study, start=1990, end=1994
+- Lineage 2: teacher=Heinz Holliger, student=[submitter], institution=Lucerne Festival, type=masterclass
+
+The parsed records are shown back to the submitter for review and correction before submission. The submitter can fix errors, add details, or remove incorrect entries. Only after confirmation do the records enter the editor review queue.
+
+Implementation:
+- Endpoint: POST /api/v1/submissions/parse-text
+- Input: free-text string + submitter name/email
+- Calls Claude API (claude-haiku-4-5-20251001) with a system prompt containing the list of existing musicians and institutions from the database for name matching
+- Returns structured candidate records for submitter review
+- On submitter confirmation, creates standard submission records in the review queue
+
+Cost: Haiku is fractions of a cent per call. ~200 tokens in, ~300 out. Thousands of submissions for under a dollar.
+
+### Admin Research Assistant
+
+When an editor is adding a new musician, they can type a name and instrument (e.g., "Eugene Izotov, oboist") into an admin tool. A Claude API call (claude-sonnet-4-6) returns a structured candidate record: bio, probable teachers, institutions, dates — sourced from training data.
+
+The editor reviews, corrects, and approves. Saves manual research time.
+
+Implementation:
+- Endpoint: POST /api/v1/admin/research (admin auth required)
+- Input: musician name + instrument
+- Calls Claude API (claude-sonnet-4-6) with a system prompt asking for structured biographical and pedagogical data
+- Returns candidate musician record + candidate lineage records
+- Editor reviews and either imports (creating real records) or discards
+
+Cost: Slightly more per call than Haiku but used infrequently. Pennies per lookup.
+
+### Cost Control
+
+- Rate limit the public parse-text endpoint: 10 calls per IP per day
+- Rate limit the admin research endpoint: 50 calls per day total
+- Use Haiku for all public-facing AI features
+- Use Sonnet only for the admin research tool
+- API key stored as ANTHROPIC_API_KEY environment variable on Railway
+- Monthly cost at expected usage: well under $5
+
+### Architectural Principle
+
+AI suggests, editor approves. Every AI-generated record enters the same review queue as manual community submissions. Nothing touches the live database without human review. An AI hallucination is just a rejected submission, not bad data on the site.
 
 ---
 
