@@ -98,6 +98,20 @@ teacher_id,teacher_name,student_id,student_name,institution_id,institution_name,
 19,Robinson,36,Hill,,,informal,,,Mentor,medium
 72,Randall,36,Hill,,,informal,,,Mentor,low
 4,Tabuteau,78,Baker,,,private_study,1963,1963,Studied privately at Tabuteau's home in Nice,high
-78,Baker,79,Cooney,,,private_study,,,Studied privately at Baker's home in Detroit,high
+78,Baker,79,Cooney,,,private_study,2007,2008,Studied privately at Baker's home in Detroit,high
 19,Robinson,80,Wilson,,,informal,1990,1999,,medium
 80,Wilson,81,de la Nuez,,,private_study,1990,1992,,high
+82,Ventura,79,Cooney,32,Wayne State,formal_study,,,,medium
+83,Shapiro,79,Cooney,32,Wayne State,formal_study,,,,medium
+85,May,79,Cooney,32,Wayne State,formal_study,,,,medium
+56,Mariotti,85,May,10,U of Michigan,formal_study,,,,high
+78,Baker,85,May,,,private_study,,,,high
+84,Sorton,85,May,33,Ohio State,formal_study,,,,high
+7,Mack,85,May,19,CIM,formal_study,,,,high
+87,Barwan,86,Sorrels,,,private_study,,,,medium
+88,Denton,86,Sorrels,34,Indiana State,formal_study,,,Undergraduate,medium
+35,Strommen,86,Sorrels,11,Indiana U Jacobs,formal_study,,,Graduate studies,medium
+89,Roe,86,Sorrels,11,Indiana U Jacobs,formal_study,,,Graduate studies,medium
+90,McClain,86,Sorrels,11,Indiana U Jacobs,formal_study,,,Graduate studies,medium
+69,Stolper,86,Sorrels,11,Indiana U Jacobs,formal_study,,,Graduate studies,medium
+33,Underwood,86,Sorrels,,,private_study,,,,medium

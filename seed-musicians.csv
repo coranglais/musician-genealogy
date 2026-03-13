@@ -33,7 +33,7 @@ id,last_name,first_name,birth_date,death_date,nationality,instrument,bio_notes,c
 32,Stovall,Nicholas,,,,American,Oboe,Principal oboe National Symphony Orchestra. Faculty Peabody.,medium
 33,Underwood,Titus,,,,American,Oboe,"Faculty Cincinnati Conservatory. ~8 teachers across 4 institutions.",medium
 34,Henoch,Michael,,,,American,Oboe,"Assistant principal oboe CSO. Faculty Northwestern.",medium
-35,Stroman,Linda,,,,American,Oboe,"Faculty Indiana U, also Juilliard and LSU.",medium
+35,Strommen,Linda,,,,American,Oboe,"Faculty Indiana University, also Juilliard and LSU. Reed specialist.",medium
 36,Hill,Mark,,,,American,Oboe,Faculty U of Maryland.,medium
 37,Cooper,Peter,,,,American,Oboe,"Principal oboe Colorado Symphony. Faculty CU Boulder.",medium
 38,Izotov,Eugene,,,,Russian-American,Oboe,Faculty SF Conservatory.,medium
@@ -67,7 +67,7 @@ id,last_name,first_name,birth_date,death_date,nationality,instrument,bio_notes,c
 66,Koch,Lothar,,,,German,Oboe,Berlin Philharmonic.,medium
 67,Gillet,Fernand,,,,French,Oboe,,low
 68,Marx,Josef,,,,American,Oboe,,low
-69,Stolper,Dan,,,,American,Oboe,Interlochen.,low
+69,Stolper,Daniel,,,,American,Oboe,Interlochen. Faculty Indiana University.,medium
 70,McCoy,Robert W.,,,,American,Oboe,"Oberlin faculty ~1950s.",low
 71,Humiston,Robert,,,,American,Oboe,"Western Michigan U faculty. Studied with McCoy at Oberlin.",low
 72,Randall,Darrel,,,,American,Oboe,,low
@@ -76,7 +76,16 @@ id,last_name,first_name,birth_date,death_date,nationality,instrument,bio_notes,c
 75,Dlouhy,Jonathan,,,,American,Oboe,,low
 76,Sherr,David,,,,American,Oboe,,low
 77,Deluna,Russ,,,,American,Oboe,Faculty SF Conservatory.,low
-78,Baker,Donald,1943,,,American,Oboe,,medium
-79,Cooney,Mark,,,,American,Oboe,,medium
-80,Wilson,Jim,1945,2025,American,Oboe,,medium
+78,Baker,Donald,1943,,,American,Oboe,"Principal oboe Dallas Symphony Orchestra, then Detroit Symphony Orchestra.",medium
+79,Cooney,Mark,1987,,,American,Oboe,,medium
+80,Wilson,James,1945,2025,American,Oboe,,medium
 81,de la Nuez,David,1974,,,American,Oboe,,high
+82,Ventura,Brian,,,,American,Oboe,Faculty Wayne State University.,medium
+83,Shapiro,Stephanie,,,,American,Oboe,Faculty Wayne State University.,medium
+84,Sorton,Robert,,,,American,Oboe,Renowned reed-maker. Faculty Ohio State University.,medium
+85,May,Eldonna,,,,American,Oboe,"Faculty Wayne State University. Ph.D. musicology Michigan State University.",medium
+86,Sorrels,Keith,,,,American,Oboe,"DM Indiana University. Lecturer MTSU School of Music. Oboe repair specialist.",medium
+87,Barwan,Amy,,,,American,Oboe,,low
+88,Denton,William,,,,American,Oboe,Faculty Indiana State University.,low
+89,Roe,Roger,,,,American,Oboe,Faculty Indiana University.,low
+90,McClain,Washington,,,,American,Oboe,Faculty Indiana University.,low
