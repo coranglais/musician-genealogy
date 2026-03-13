@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
 import { listMusicians } from '../api'
+import { SITE_NAME_SHORT } from '../constants'
 
 const FEATURED = [
   { id: 4, name: 'Marcel Tabuteau', desc: 'Founder of the American school of oboe' },
@@ -21,10 +22,10 @@ export default function HomePage() {
     <div>
       <section className="py-12 text-center">
         <h1 className="text-4xl font-bold text-stone-800 mb-3">
-          Musician Genealogy
+          {SITE_NAME_SHORT}
         </h1>
-        <p className="text-lg text-stone-500 mb-8 max-w-xl mx-auto">
-          Explore pedagogical lineages — who studied with whom, where, and when.
+        <p className="text-lg text-stone-500 italic mb-8 max-w-xl mx-auto">
+          Every teacher matters. Every lineage counts.
         </p>
         <div className="mx-auto max-w-lg">
           <SearchBar autoFocus />
