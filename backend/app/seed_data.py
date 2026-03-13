@@ -21,6 +21,8 @@ from app.models import (
     MusicianInstrument,
     Institution,
     Lineage,
+    Source,
+    LineageSource,
 )
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -166,6 +168,82 @@ def load_lineage(db):
         print(f"  Lineage: {count_new} new, {count_skipped} skipped")
 
 
+def load_sources(db):
+    csv_path = os.path.join(PROJECT_ROOT, "seed-sources.csv")
+    with open(csv_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        count_new = 0
+        for row in reader:
+            source_id = int(row["id"])
+            existing = db.get(Source, source_id)
+            if existing:
+                continue
+            source = Source(
+                id=source_id,
+                title=row["title"].strip(),
+                author=row["author"].strip() if row["author"].strip() else None,
+                source_type=row["source_type"].strip(),
+                url=row["url"].strip() if row["url"].strip() else None,
+                isbn=row["isbn"].strip() if row["isbn"].strip() else None,
+                notes=row["notes"].strip() if row["notes"].strip() else None,
+            )
+            db.add(source)
+            count_new += 1
+        db.flush()
+        print(f"  Sources: {count_new} new")
+
+
+def load_lineage_sources(db):
+    csv_path = os.path.join(PROJECT_ROOT, "seed-lineage-sources.csv")
+    with open(csv_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        count_new = 0
+        count_skipped = 0
+        for row in reader:
+            teacher_id = int(row["teacher_id"])
+            student_id = int(row["student_id"])
+            institution_id = int(row["institution_id"]) if row["institution_id"].strip() else None
+            source_id = int(row["source_id"])
+            page_reference = row["page_reference"].strip() if row["page_reference"].strip() else None
+
+            # Find the lineage record
+            stmt = select(Lineage).where(
+                Lineage.teacher_id == teacher_id,
+                Lineage.student_id == student_id,
+            )
+            if institution_id:
+                stmt = stmt.where(Lineage.institution_id == institution_id)
+            else:
+                stmt = stmt.where(Lineage.institution_id.is_(None))
+
+            lineage = db.execute(stmt).scalar_one_or_none()
+            if not lineage:
+                print(f"  WARNING: Skipping lineage-source — lineage not found for teacher={teacher_id} student={student_id}")
+                count_skipped += 1
+                continue
+
+            # Check for existing link (idempotent)
+            existing = db.execute(
+                select(LineageSource).where(
+                    LineageSource.lineage_id == lineage.id,
+                    LineageSource.source_id == source_id,
+                )
+            ).scalar_one_or_none()
+            if existing:
+                count_skipped += 1
+                continue
+
+            ls = LineageSource(
+                lineage_id=lineage.id,
+                source_id=source_id,
+                page_reference=page_reference,
+            )
+            db.add(ls)
+            count_new += 1
+        db.flush()
+        print(f"  Lineage sources: {count_new} new, {count_skipped} skipped")
+
+
 def seed():
     print("Seeding database...")
     db = SessionLocal()
@@ -174,6 +252,8 @@ def seed():
         load_institutions(db)
         load_musicians(db)
         load_lineage(db)
+        load_sources(db)
+        load_lineage_sources(db)
         db.commit()
         print("Seed complete.")
     except Exception:

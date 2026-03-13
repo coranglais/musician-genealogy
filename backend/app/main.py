@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .routers import auth, musicians, lineage, instruments, institutions, search, submissions
+from .routers import auth, musicians, lineage, instruments, institutions, search, sources, submissions
 
 app = FastAPI(
     title="Musician Genealogy API",
@@ -30,6 +30,7 @@ app.include_router(lineage.router)
 app.include_router(instruments.router)
 app.include_router(institutions.router)
 app.include_router(search.router)
+app.include_router(sources.router)
 app.include_router(submissions.router)
 
 

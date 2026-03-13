@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from ..auth import require_admin
 from ..database import get_db
-from ..models import Lineage
+from ..models import Lineage, LineageSource
 from ..schemas import LineageCreate, LineageRead, LineageUpdate
 
 router = APIRouter(prefix="/api/v1/lineage", tags=["lineage"])
@@ -26,6 +26,7 @@ def list_lineage(
             selectinload(Lineage.teacher),
             selectinload(Lineage.student),
             selectinload(Lineage.institution),
+            selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
     )
 
@@ -66,6 +67,7 @@ def create_lineage(
             selectinload(Lineage.teacher),
             selectinload(Lineage.student),
             selectinload(Lineage.institution),
+            selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
         .where(Lineage.id == lineage.id)
     )
@@ -96,6 +98,7 @@ def update_lineage(
             selectinload(Lineage.teacher),
             selectinload(Lineage.student),
             selectinload(Lineage.institution),
+            selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
         .where(Lineage.id == lineage.id)
     )

@@ -102,6 +102,46 @@ class InstitutionSummary(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# --- Sources ---
+
+class SourceBase(BaseModel):
+    title: str
+    author: Optional[str] = None
+    source_type: str
+    url: Optional[str] = None
+    isbn: Optional[str] = None
+    notes: Optional[str] = None
+
+class SourceCreate(SourceBase):
+    pass
+
+class SourceUpdate(BaseModel):
+    title: Optional[str] = None
+    author: Optional[str] = None
+    source_type: Optional[str] = None
+    url: Optional[str] = None
+    isbn: Optional[str] = None
+    notes: Optional[str] = None
+
+class SourceRead(SourceBase):
+    id: int
+    model_config = {"from_attributes": True}
+
+class LineageSourceBase(BaseModel):
+    lineage_id: int
+    source_id: int
+    page_reference: Optional[str] = None
+
+class LineageSourceCreate(BaseModel):
+    page_reference: Optional[str] = None
+
+class LineageSourceRead(BaseModel):
+    id: int
+    source: SourceRead
+    page_reference: Optional[str] = None
+    model_config = {"from_attributes": True}
+
+
 # --- Lineage ---
 
 class LineageBase(BaseModel):
@@ -128,6 +168,7 @@ class LineageRead(LineageBase):
     teacher: MusicianSummary
     student: MusicianSummary
     institution: Optional[InstitutionSummary] = None
+    sources: list[LineageSourceRead] = []
     model_config = {"from_attributes": True}
 
 

@@ -10,6 +10,7 @@ from ..models import (
     MusicianInstrument,
     MusicianName,
     Lineage,
+    LineageSource,
     Institution,
 )
 from ..schemas import (
@@ -74,6 +75,7 @@ def get_teachers(musician_id: int, db: Session = Depends(get_db)):
             selectinload(Lineage.teacher),
             selectinload(Lineage.student),
             selectinload(Lineage.institution),
+            selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
         .where(Lineage.student_id == musician_id)
     )
@@ -89,6 +91,7 @@ def get_students(musician_id: int, db: Session = Depends(get_db)):
             selectinload(Lineage.teacher),
             selectinload(Lineage.student),
             selectinload(Lineage.institution),
+            selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
         .where(Lineage.teacher_id == musician_id)
     )
@@ -124,7 +127,11 @@ def get_lineage_tree(
 
         stmt = (
             select(Lineage)
-            .options(selectinload(Lineage.teacher), selectinload(Lineage.institution))
+            .options(
+                selectinload(Lineage.teacher),
+                selectinload(Lineage.institution),
+                selectinload(Lineage.sources).selectinload(LineageSource.source),
+            )
             .where(Lineage.student_id == mid)
         )
         if not include_secondary:
@@ -150,6 +157,22 @@ def get_lineage_tree(
                     "city": lin.institution.city,
                     "country": lin.institution.country,
                 } if lin.institution else None,
+                "sources": [
+                    {
+                        "id": ls.id,
+                        "source": {
+                            "id": ls.source.id,
+                            "title": ls.source.title,
+                            "author": ls.source.author,
+                            "source_type": ls.source.source_type,
+                            "url": ls.source.url,
+                            "isbn": ls.source.isbn,
+                            "notes": ls.source.notes,
+                        },
+                        "page_reference": ls.page_reference,
+                    }
+                    for ls in lin.sources
+                ],
                 "depth": current_depth,
                 "visual_weight": get_visual_weight(lin.relationship_type),
                 "children": build_ancestors(t.id, current_depth + 1, visited),
@@ -164,7 +187,11 @@ def get_lineage_tree(
 
         stmt = (
             select(Lineage)
-            .options(selectinload(Lineage.student), selectinload(Lineage.institution))
+            .options(
+                selectinload(Lineage.student),
+                selectinload(Lineage.institution),
+                selectinload(Lineage.sources).selectinload(LineageSource.source),
+            )
             .where(Lineage.teacher_id == mid)
         )
         if not include_secondary:
@@ -190,6 +217,22 @@ def get_lineage_tree(
                     "city": lin.institution.city,
                     "country": lin.institution.country,
                 } if lin.institution else None,
+                "sources": [
+                    {
+                        "id": ls.id,
+                        "source": {
+                            "id": ls.source.id,
+                            "title": ls.source.title,
+                            "author": ls.source.author,
+                            "source_type": ls.source.source_type,
+                            "url": ls.source.url,
+                            "isbn": ls.source.isbn,
+                            "notes": ls.source.notes,
+                        },
+                        "page_reference": ls.page_reference,
+                    }
+                    for ls in lin.sources
+                ],
                 "depth": current_depth,
                 "visual_weight": get_visual_weight(lin.relationship_type),
                 "children": build_descendants(s.id, current_depth + 1, visited),
