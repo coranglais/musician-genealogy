@@ -119,3 +119,5 @@ teacher_id,teacher_name,student_id,student_name,institution_id,institution_name,
 92,Minsker,91,Genovese,,,private_study,,,,high
 4,Tabuteau,91,Genovese,2,Curtis,formal_study,,,,high
 91,Genovese,80,Wilson,,,private_study,,,,medium
+94,Rose,93,Bond,3,Juilliard,formal_study,,,,high
+95,Robbins,93,Bond,3,Juilliard,formal_study,,,,high

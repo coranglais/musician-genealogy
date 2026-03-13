@@ -36,16 +36,23 @@ def build_name_search(first_name: str, last_name: str) -> str:
     return normalize_search(f"{first_name} {last_name}")
 
 
+INSTRUMENT_FAMILIES = {
+    "Oboe": "Woodwind",
+    "Cello": "String",
+}
+
+
 def load_instruments(db):
-    """Ensure the Oboe instrument exists."""
-    existing = db.execute(select(Instrument).where(Instrument.name == "Oboe")).scalar_one_or_none()
-    if not existing:
-        instrument = Instrument(id=1, name="Oboe", family="Woodwind")
-        db.add(instrument)
-        db.flush()
-        print("  Created instrument: Oboe")
-    else:
-        print("  Instrument Oboe already exists")
+    """Ensure all required instruments exist."""
+    count_new = 0
+    for name, family in INSTRUMENT_FAMILIES.items():
+        existing = db.execute(select(Instrument).where(Instrument.name == name)).scalar_one_or_none()
+        if not existing:
+            instrument = Instrument(name=name, family=family)
+            db.add(instrument)
+            count_new += 1
+    db.flush()
+    print(f"  Instruments: {count_new} new")
 
 
 def load_institutions(db):
@@ -72,7 +79,10 @@ def load_institutions(db):
 
 def load_musicians(db):
     csv_path = os.path.join(PROJECT_ROOT, "seed-musicians.csv")
-    oboe = db.execute(select(Instrument).where(Instrument.name == "Oboe")).scalar_one()
+
+    # Build instrument lookup by name
+    instruments = db.execute(select(Instrument)).scalars().all()
+    instrument_by_name = {i.name: i for i in instruments}
 
     with open(csv_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -99,20 +109,23 @@ def load_musicians(db):
             db.add(musician)
             db.flush()
 
-            # Link to instrument
-            existing_link = db.execute(
-                select(MusicianInstrument).where(
-                    MusicianInstrument.musician_id == m_id,
-                    MusicianInstrument.instrument_id == oboe.id,
-                )
-            ).scalar_one_or_none()
-            if not existing_link:
-                mi = MusicianInstrument(
-                    musician_id=m_id,
-                    instrument_id=oboe.id,
-                    is_primary=True,
-                )
-                db.add(mi)
+            # Link to instrument from CSV
+            inst_name = row["instrument"].strip() if row.get("instrument", "").strip() else "Oboe"
+            instrument = instrument_by_name.get(inst_name)
+            if instrument:
+                existing_link = db.execute(
+                    select(MusicianInstrument).where(
+                        MusicianInstrument.musician_id == m_id,
+                        MusicianInstrument.instrument_id == instrument.id,
+                    )
+                ).scalar_one_or_none()
+                if not existing_link:
+                    mi = MusicianInstrument(
+                        musician_id=m_id,
+                        instrument_id=instrument.id,
+                        is_primary=True,
+                    )
+                    db.add(mi)
 
             count_new += 1
         db.flush()
