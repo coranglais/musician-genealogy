@@ -206,18 +206,11 @@ class AutocompleteResult(BaseModel):
 
 # --- Submissions ---
 
-class SubmissionCreate(BaseModel):
-    submitter_name: str
-    submitter_email: str
-    submission_type: str
-    teacher_name: Optional[str] = None
-    student_name: Optional[str] = None
-    institution_name: Optional[str] = None
-    relationship_type: Optional[str] = None
-    start_year: Optional[int] = None
-    end_year: Optional[int] = None
-    notes: Optional[str] = None
-    verification_info: Optional[str] = None
+class SubmissionRecordRead(BaseModel):
+    id: int
+    record_type: str
+    record_id: int
+    model_config = {"from_attributes": True}
 
 class SubmissionStatusCheck(BaseModel):
     id: int
@@ -229,23 +222,72 @@ class SubmissionRead(BaseModel):
     submitter_name: str
     submitter_email: str
     submission_type: str
-    teacher_name: Optional[str] = None
-    student_name: Optional[str] = None
-    institution_name: Optional[str] = None
-    relationship_type: Optional[str] = None
-    start_year: Optional[int] = None
-    end_year: Optional[int] = None
     notes: Optional[str] = None
     verification_info: Optional[str] = None
+    original_text: Optional[str] = None
     status: str
     editor_notes: Optional[str] = None
     created_at: Optional[datetime] = None
     reviewed_at: Optional[datetime] = None
+    records: list[SubmissionRecordRead] = []
     model_config = {"from_attributes": True}
 
 class SubmissionUpdate(BaseModel):
-    status: Optional[str] = None
     editor_notes: Optional[str] = None
+
+
+# --- Submission Form Input ---
+
+class StructuredSubmission(BaseModel):
+    submitter_name: str
+    submitter_email: str
+    student_first_name: str
+    student_last_name: str
+    student_birth_date: Optional[str] = None
+    student_death_date: Optional[str] = None
+    student_nationality: Optional[str] = None
+    student_instrument: Optional[str] = None
+    relationships: list["SubmittedRelationship"] = []
+    notes: Optional[str] = None
+    verification_info: Optional[str] = None
+    honeypot: Optional[str] = None
+
+class SubmittedRelationship(BaseModel):
+    teacher_first_name: str
+    teacher_last_name: str
+    institution_name: Optional[str] = None
+    institution_city: Optional[str] = None
+    institution_country: Optional[str] = None
+    relationship_type: str = "formal_study"
+    start_year: Optional[int] = None
+    end_year: Optional[int] = None
+    notes: Optional[str] = None
+
+class FreeTextSubmission(BaseModel):
+    submitter_name: str
+    submitter_email: str
+    text: str
+    verification_info: Optional[str] = None
+    honeypot: Optional[str] = None
+
+class ParsedSubmissionPreview(BaseModel):
+    """Returned by the AI parsing endpoint for submitter review."""
+    student: "ParsedMusician"
+    relationships: list["ParsedRelationship"] = []
+
+class ParsedMusician(BaseModel):
+    first_name: str
+    last_name: str
+    existing_id: Optional[int] = None
+    instrument: Optional[str] = None
+
+class ParsedRelationship(BaseModel):
+    teacher: ParsedMusician
+    institution_name: Optional[str] = None
+    institution_city: Optional[str] = None
+    relationship_type: str = "formal_study"
+    start_year: Optional[int] = None
+    end_year: Optional[int] = None
 
 
 # --- Auth ---

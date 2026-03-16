@@ -14,7 +14,7 @@ def list_institutions(
     q: str | None = None,
     db: Session = Depends(get_db),
 ):
-    stmt = select(Institution).order_by(Institution.name)
+    stmt = select(Institution).where(Institution.status == "active").order_by(Institution.name)
     if q:
         stmt = stmt.where(Institution.name.ilike(f"%{q}%"))
     result = db.execute(stmt)
@@ -26,7 +26,7 @@ def get_institution(institution_id: int, db: Session = Depends(get_db)):
     stmt = (
         select(Institution)
         .options(selectinload(Institution.historical_names))
-        .where(Institution.id == institution_id)
+        .where(Institution.id == institution_id, Institution.status == "active")
     )
     institution = db.execute(stmt).scalar_one_or_none()
     if not institution:

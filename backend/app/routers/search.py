@@ -29,7 +29,7 @@ def global_search(
     # Search musicians
     musician_stmt = (
         select(Musician)
-        .where(Musician.name_search.ilike(f"%{normalized}%"))
+        .where(Musician.status == "active", Musician.name_search.ilike(f"%{normalized}%"))
         .order_by(
             # Rank: exact > starts-with > contains
             case(
@@ -74,7 +74,7 @@ def global_search(
             continue
         seen_ids.add(an.musician_id)
         m = db.get(Musician, an.musician_id)
-        if m:
+        if m and m.status == "active":
             results.append(SearchResult(
                 id=m.id,
                 display_name=f"{m.first_name} {m.last_name}",
@@ -88,7 +88,7 @@ def global_search(
     # Search institutions
     inst_stmt = (
         select(Institution)
-        .where(Institution.name.ilike(f"%{q}%"))
+        .where(Institution.status == "active", Institution.name.ilike(f"%{q}%"))
         .order_by(Institution.name)
         .limit(per_page)
         .offset(offset)
@@ -122,7 +122,7 @@ def autocomplete(
     # 1. Prefix match on canonical name
     prefix_stmt = (
         select(Musician)
-        .where(Musician.name_search.ilike(f"{normalized}%"))
+        .where(Musician.status == "active", Musician.name_search.ilike(f"{normalized}%"))
         .limit(limit)
     )
     for m in db.execute(prefix_stmt).scalars().all():
@@ -139,7 +139,7 @@ def autocomplete(
     # 2. Contains match on canonical name
     contains_stmt = (
         select(Musician)
-        .where(Musician.name_search.ilike(f"%{normalized}%"))
+        .where(Musician.status == "active", Musician.name_search.ilike(f"%{normalized}%"))
         .limit(limit)
     )
     for m in db.execute(contains_stmt).scalars().all():
@@ -162,7 +162,7 @@ def autocomplete(
     for an in db.execute(alt_stmt).scalars().all():
         if an.musician_id not in results:
             m = db.get(Musician, an.musician_id)
-            if m:
+            if m and m.status == "active":
                 results[an.musician_id] = AutocompleteResult(
                     musician_id=m.id,
                     display_name=f"{m.first_name} {m.last_name}",

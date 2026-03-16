@@ -26,7 +26,7 @@ def musicians_for_instrument(
     stmt = (
         select(Musician)
         .join(MusicianInstrument)
-        .where(MusicianInstrument.instrument_id == instrument_id)
+        .where(MusicianInstrument.instrument_id == instrument_id, Musician.status == "active")
         .order_by(Musician.last_name, Musician.first_name)
         .offset(offset)
         .limit(per_page)

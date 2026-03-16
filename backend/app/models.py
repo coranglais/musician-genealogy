@@ -41,6 +41,7 @@ class Musician(Base):
     nationality = Column(String(100), nullable=True)
     bio_notes = Column(Text, nullable=True)
     name_search = Column(String(500), nullable=True, index=True)
+    status = Column(String(20), nullable=False, default="active", server_default="active")
     created_at = Column(DateTime, default=utcnow)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow)
 
@@ -85,6 +86,7 @@ class Lineage(Base):
     end_year = Column(Integer, nullable=True)
     relationship_type = Column(String(50), nullable=False, default="formal_study")
     notes = Column(Text, nullable=True)
+    status = Column(String(20), nullable=False, default="active", server_default="active")
     created_at = Column(DateTime, default=utcnow)
 
     teacher = relationship("Musician", foreign_keys=[teacher_id], back_populates="student_lineages")
@@ -105,6 +107,7 @@ class Institution(Base):
     city = Column(String(100), nullable=True)
     country = Column(String(100), nullable=True)
     founded_year = Column(Integer, nullable=True)
+    status = Column(String(20), nullable=False, default="active", server_default="active")
     created_at = Column(DateTime, default=utcnow)
 
     historical_names = relationship("InstitutionName", back_populates="institution", cascade="all, delete-orphan")
@@ -149,22 +152,30 @@ class LineageSource(Base):
     source = relationship("Source", back_populates="lineage_sources")
 
 
-class Submission(Base):
-    __tablename__ = "submissions"
+class SubmissionMetadata(Base):
+    __tablename__ = "submission_metadata"
 
     id = Column(Integer, primary_key=True, index=True)
     submitter_name = Column(String(200), nullable=False)
     submitter_email = Column(String(200), nullable=False)
     submission_type = Column(String(50), nullable=False)
-    teacher_name = Column(String(300), nullable=True)
-    student_name = Column(String(300), nullable=True)
-    institution_name = Column(String(300), nullable=True)
-    relationship_type = Column(String(50), nullable=True)
-    start_year = Column(Integer, nullable=True)
-    end_year = Column(Integer, nullable=True)
     notes = Column(Text, nullable=True)
     verification_info = Column(Text, nullable=True)
+    original_text = Column(Text, nullable=True)
     status = Column(String(20), nullable=False, default="submitted")
     editor_notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=utcnow)
     reviewed_at = Column(DateTime, nullable=True)
+
+    records = relationship("SubmissionRecord", back_populates="submission", cascade="all, delete-orphan")
+
+
+class SubmissionRecord(Base):
+    __tablename__ = "submission_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    submission_id = Column(Integer, ForeignKey("submission_metadata.id"), nullable=False)
+    record_type = Column(String(50), nullable=False)
+    record_id = Column(Integer, nullable=False)
+
+    submission = relationship("SubmissionMetadata", back_populates="records")

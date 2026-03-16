@@ -37,7 +37,7 @@ def list_musicians(
     db: Session = Depends(get_db),
 ):
     offset = (page - 1) * per_page
-    stmt = select(Musician)
+    stmt = select(Musician).where(Musician.status == "active")
 
     if instrument:
         stmt = stmt.join(MusicianInstrument).where(MusicianInstrument.instrument_id == instrument)
@@ -59,7 +59,7 @@ def get_musician(musician_id: int, db: Session = Depends(get_db)):
             selectinload(Musician.alternate_names),
             selectinload(Musician.musician_instruments).selectinload(MusicianInstrument.instrument),
         )
-        .where(Musician.id == musician_id)
+        .where(Musician.id == musician_id, Musician.status == "active")
     )
     musician = db.execute(stmt).scalar_one_or_none()
     if not musician:
@@ -77,7 +77,7 @@ def get_teachers(musician_id: int, db: Session = Depends(get_db)):
             selectinload(Lineage.institution),
             selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
-        .where(Lineage.student_id == musician_id)
+        .where(Lineage.student_id == musician_id, Lineage.status == "active")
     )
     result = db.execute(stmt)
     return result.scalars().all()
@@ -93,7 +93,7 @@ def get_students(musician_id: int, db: Session = Depends(get_db)):
             selectinload(Lineage.institution),
             selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
-        .where(Lineage.teacher_id == musician_id)
+        .where(Lineage.teacher_id == musician_id, Lineage.status == "active")
     )
     result = db.execute(stmt)
     return result.scalars().all()
@@ -107,7 +107,9 @@ def get_lineage_tree(
     db: Session = Depends(get_db),
 ):
     """Recursive lineage tree: ancestors (teachers) and descendants (students)."""
-    musician = db.get(Musician, musician_id)
+    musician = db.execute(
+        select(Musician).where(Musician.id == musician_id, Musician.status == "active")
+    ).scalar_one_or_none()
     if not musician:
         raise HTTPException(status_code=404, detail="Musician not found")
 
@@ -132,7 +134,7 @@ def get_lineage_tree(
                 selectinload(Lineage.institution),
                 selectinload(Lineage.sources).selectinload(LineageSource.source),
             )
-            .where(Lineage.student_id == mid)
+            .where(Lineage.student_id == mid, Lineage.status == "active")
         )
         if not include_secondary:
             stmt = stmt.where(Lineage.relationship_type.in_(primary_types))
@@ -192,7 +194,7 @@ def get_lineage_tree(
                 selectinload(Lineage.institution),
                 selectinload(Lineage.sources).selectinload(LineageSource.source),
             )
-            .where(Lineage.teacher_id == mid)
+            .where(Lineage.teacher_id == mid, Lineage.status == "active")
         )
         if not include_secondary:
             stmt = stmt.where(Lineage.relationship_type.in_(primary_types))

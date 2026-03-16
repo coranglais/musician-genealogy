@@ -1,8 +1,14 @@
 import { Link, Outlet } from 'react-router-dom'
 import SearchBar from './SearchBar'
 import { SITE_NAME_SHORT, SITE_NAME } from '../constants'
+import { logout } from '../api'
 
-export default function Layout() {
+export default function Layout({ isAdmin, onLogout }) {
+  async function handleLogout() {
+    try { await logout() } catch {}
+    onLogout()
+  }
+
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <header className="bg-stone-800 text-stone-100 shadow-md">
@@ -14,9 +20,27 @@ export default function Layout() {
             <Link to="/about" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
               About
             </Link>
+            <Link to="/submit" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
+              Contribute
+            </Link>
           </div>
-          <div className="hidden sm:block w-72">
-            <SearchBar compact />
+          <div className="flex items-center gap-4">
+            {isAdmin && (
+              <div className="flex items-center gap-2">
+                <Link to="/admin" className="text-sm text-amber-300 hover:text-amber-200 transition-colors">
+                  Review Queue
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-stone-400 hover:text-stone-200 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+            <div className="hidden sm:block w-72">
+              <SearchBar compact />
+            </div>
           </div>
         </div>
       </header>
@@ -24,7 +48,11 @@ export default function Layout() {
         <Outlet />
       </main>
       <footer className="mt-16 border-t border-stone-200 py-6 text-center text-sm text-stone-400">
-        {SITE_NAME}
+        <span>{SITE_NAME}</span>
+        <span className="mx-2">·</span>
+        <Link to="/privacy" className="hover:text-stone-600 transition-colors">
+          Privacy Policy
+        </Link>
       </footer>
     </div>
   )

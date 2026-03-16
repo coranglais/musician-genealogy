@@ -28,6 +28,7 @@ def list_lineage(
             selectinload(Lineage.institution),
             selectinload(Lineage.sources).selectinload(LineageSource.source),
         )
+        .where(Lineage.status == "active")
     )
 
     if teacher_id:
