@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from unidecode import unidecode
 
 from ..database import get_db
-from ..models import Musician, MusicianName, Institution
+from ..models import Instrument, Musician, MusicianInstrument, MusicianName, Institution
 from ..schemas import SearchResult, AutocompleteResult
 
 router = APIRouter(prefix="/api/v1/search", tags=["search"])
@@ -17,6 +17,7 @@ def normalize(text: str) -> str:
 @router.get("", response_model=list[SearchResult])
 def global_search(
     q: str,
+    instrument: int | None = None,
     page: int = 1,
     per_page: int = 20,
     db: Session = Depends(get_db),
@@ -26,11 +27,30 @@ def global_search(
     offset = (page - 1) * per_page
     results = []
 
+    # Resolve instrument family IDs if filtering by instrument
+    family_ids = None
+    if instrument:
+        inst = db.get(Instrument, instrument)
+        if inst:
+            parent_id = inst.parent_id if inst.parent_id else inst.id
+            family_stmt = select(Instrument.id).where(
+                (Instrument.id == parent_id) | (Instrument.parent_id == parent_id)
+            )
+            family_ids = [row[0] for row in db.execute(family_stmt).all()]
+        else:
+            family_ids = [instrument]
+
     # Search musicians
     musician_stmt = (
         select(Musician)
         .where(Musician.status == "active", Musician.name_search.ilike(f"%{normalized}%"))
-        .order_by(
+    )
+    if family_ids is not None:
+        musician_stmt = musician_stmt.join(MusicianInstrument).where(
+            MusicianInstrument.instrument_id.in_(family_ids)
+        )
+    musician_stmt = (
+        musician_stmt.order_by(
             # Rank: exact > starts-with > contains
             case(
                 (Musician.name_search == normalized, 0),
@@ -130,6 +150,8 @@ def autocomplete(
             results[m.id] = AutocompleteResult(
                 musician_id=m.id,
                 display_name=f"{m.first_name} {m.last_name}",
+                first_name=m.first_name,
+                last_name=m.last_name,
                 birth_date=m.birth_date,
                 death_date=m.death_date,
                 match_score=0.9,
@@ -147,6 +169,8 @@ def autocomplete(
             results[m.id] = AutocompleteResult(
                 musician_id=m.id,
                 display_name=f"{m.first_name} {m.last_name}",
+                first_name=m.first_name,
+                last_name=m.last_name,
                 birth_date=m.birth_date,
                 death_date=m.death_date,
                 match_score=0.6,
@@ -166,6 +190,8 @@ def autocomplete(
                 results[an.musician_id] = AutocompleteResult(
                     musician_id=m.id,
                     display_name=f"{m.first_name} {m.last_name}",
+                    first_name=m.first_name,
+                    last_name=m.last_name,
                     birth_date=m.birth_date,
                     death_date=m.death_date,
                     match_score=0.4,

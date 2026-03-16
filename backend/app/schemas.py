@@ -11,10 +11,23 @@ class InstrumentBase(BaseModel):
     family: str
 
 class InstrumentCreate(InstrumentBase):
-    pass
+    parent_id: Optional[int] = None
 
 class InstrumentRead(InstrumentBase):
     id: int
+    parent_id: Optional[int] = None
+    model_config = {"from_attributes": True}
+
+class InstrumentCompanionRead(BaseModel):
+    id: int
+    name: str
+    family: str
+    model_config = {"from_attributes": True}
+
+class InstrumentWithCompanionsRead(InstrumentBase):
+    id: int
+    parent_id: Optional[int] = None
+    companions: list[InstrumentCompanionRead] = []
     model_config = {"from_attributes": True}
 
 
@@ -198,6 +211,8 @@ class SearchResult(BaseModel):
 class AutocompleteResult(BaseModel):
     musician_id: int
     display_name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     birth_date: Optional[str] = None
     death_date: Optional[str] = None
     match_score: float = 0.0

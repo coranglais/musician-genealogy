@@ -25,8 +25,11 @@ class Instrument(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False, unique=True)
     family = Column(String(50), nullable=False)
+    parent_id = Column(Integer, ForeignKey("instruments.id"), nullable=True)
     created_at = Column(DateTime, default=utcnow)
 
+    parent = relationship("Instrument", remote_side=[id], back_populates="companions")
+    companions = relationship("Instrument", back_populates="parent")
     musician_instruments = relationship("MusicianInstrument", back_populates="instrument")
 
 

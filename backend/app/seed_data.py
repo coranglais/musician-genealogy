@@ -36,23 +36,47 @@ def build_name_search(first_name: str, last_name: str) -> str:
     return normalize_search(f"{first_name} {last_name}")
 
 
-INSTRUMENT_FAMILIES = {
-    "Oboe": "Woodwind",
-    "Cello": "String",
-}
-
-
 def load_instruments(db):
-    """Ensure all required instruments exist."""
+    """Load instruments from CSV. Two passes: create all, then resolve parent references."""
+    csv_path = os.path.join(PROJECT_ROOT, "seed-instruments.csv")
+    if not os.path.exists(csv_path):
+        print("  Instruments: seed-instruments.csv not found, skipping")
+        return
+
+    # First pass: create instruments without parent_id
+    rows = []
+    with open(csv_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
     count_new = 0
-    for name, family in INSTRUMENT_FAMILIES.items():
+    for row in rows:
+        name = row["name"].strip()
         existing = db.execute(select(Instrument).where(Instrument.name == name)).scalar_one_or_none()
         if not existing:
-            instrument = Instrument(name=name, family=family)
+            instrument = Instrument(
+                name=name,
+                family=row["family"].strip(),
+            )
             db.add(instrument)
             count_new += 1
     db.flush()
-    print(f"  Instruments: {count_new} new")
+
+    # Second pass: resolve parent_name to parent_id
+    count_linked = 0
+    for row in rows:
+        parent_name = row.get("parent_name", "").strip()
+        if not parent_name:
+            continue
+        name = row["name"].strip()
+        instrument = db.execute(select(Instrument).where(Instrument.name == name)).scalar_one_or_none()
+        if instrument and not instrument.parent_id:
+            parent = db.execute(select(Instrument).where(Instrument.name == parent_name)).scalar_one_or_none()
+            if parent:
+                instrument.parent_id = parent.id
+                count_linked += 1
+    db.flush()
+    print(f"  Instruments: {count_new} new, {count_linked} parent links set")
 
 
 def load_institutions(db):

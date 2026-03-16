@@ -8,6 +8,7 @@ import AboutPage from './pages/AboutPage'
 import SubmitPage from './pages/SubmitPage'
 import AdminLogin from './pages/AdminLogin'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import HowItWorksPage from './pages/HowItWorksPage'
 import AdminReviewQueue from './pages/AdminReviewQueue'
 import AdminSubmissionDetail from './pages/AdminSubmissionDetail'
 
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/submit" element={<SubmitPage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/musician/:id" element={<MusicianDetail />} />
         <Route path="/admin/login" element={<AdminLogin onLogin={() => setIsAdmin(true)} />} />

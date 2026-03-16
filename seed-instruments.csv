@@ -1,0 +1,56 @@
+id,name,family,parent_name
+1,Oboe,Woodwind,
+2,English Horn,Woodwind,Oboe
+3,Oboe d'Amore,Woodwind,Oboe
+4,Bass Oboe,Woodwind,Oboe
+5,Flute,Woodwind,
+6,Piccolo,Woodwind,Flute
+7,Alto Flute,Woodwind,Flute
+8,Bass Flute,Woodwind,Flute
+9,Clarinet,Woodwind,
+10,Eb Clarinet,Woodwind,Clarinet
+11,Bass Clarinet,Woodwind,Clarinet
+12,Basset Horn,Woodwind,Clarinet
+13,Bassoon,Woodwind,
+14,Contrabassoon,Woodwind,Bassoon
+15,Saxophone,Woodwind,
+16,Soprano Saxophone,Woodwind,Saxophone
+17,Alto Saxophone,Woodwind,Saxophone
+18,Tenor Saxophone,Woodwind,Saxophone
+19,Baritone Saxophone,Woodwind,Saxophone
+20,Recorder,Woodwind,
+21,Trumpet,Brass,
+22,Cornet,Brass,Trumpet
+23,Flugelhorn,Brass,Trumpet
+24,Piccolo Trumpet,Brass,Trumpet
+25,Horn,Brass,
+26,Wagner Tuba,Brass,Horn
+27,Trombone,Brass,
+28,Bass Trombone,Brass,Trombone
+29,Alto Trombone,Brass,Trombone
+30,Tuba,Brass,
+31,Euphonium,Brass,Tuba
+32,Violin,String,
+33,Viola,String,
+34,Cello,String,
+35,Double Bass,String,
+36,Classical Guitar,String,
+37,Harp,String,
+38,Piano,Keyboard,
+39,Organ,Keyboard,
+40,Harpsichord,Keyboard,
+41,Celesta,Keyboard,
+42,Timpani,Percussion,
+43,Percussion,Percussion,
+44,Marimba,Percussion,Percussion
+45,Vibraphone,Percussion,Percussion
+46,Voice,Voice,
+47,Soprano,Voice,Voice
+48,Mezzo-Soprano,Voice,Voice
+49,Contralto,Voice,Voice
+50,Tenor,Voice,Voice
+51,Baritone,Voice,Voice
+52,Bass,Voice,Voice
+53,Composer,Discipline,
+54,Conductor,Discipline,
+55,Music Theory,Discipline,

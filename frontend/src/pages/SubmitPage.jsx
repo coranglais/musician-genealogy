@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { submitContribution, autocomplete } from '../api'
+import { useState, useEffect } from 'react'
+import { submitContribution, autocomplete, listInstitutions, listInstruments } from '../api'
 import { SITE_NAME_SHORT } from '../constants'
+import AutocompleteInput from '../components/AutocompleteInput'
 
 const RELATIONSHIP_TYPES = [
   { value: 'formal_study', label: 'Conservatory / University Study' },
@@ -42,6 +43,11 @@ export default function SubmitPage() {
   const [submitted, setSubmitted] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [instruments, setInstruments] = useState([])
+
+  useEffect(() => {
+    listInstruments().then(setInstruments).catch(() => {})
+  }, [])
 
   function updateField(field, value) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -69,12 +75,37 @@ export default function SubmitPage() {
     }))
   }
 
+  // Musician name autocomplete: search by last name (or combined if first name exists)
+  async function searchMusicians(lastName, firstName = '') {
+    const q = firstName ? `${firstName} ${lastName}` : lastName
+    return autocomplete(q)
+  }
+
+  // Institution autocomplete
+  async function searchInstitutions(q) {
+    if (q.length < 2) return []
+    return listInstitutions(q)
+  }
+
+  // Instrument autocomplete: client-side filter from preloaded list
+  function searchInstruments(q) {
+    const lower = q.toLowerCase()
+    return Promise.resolve(
+      instruments.filter(inst => inst.name.toLowerCase().includes(lower))
+    )
+  }
+
+  function formatInstrumentDisplay(inst) {
+    if (!inst.parent_id) return inst.name
+    const parent = instruments.find(i => i.id === inst.parent_id)
+    return parent ? `${inst.name} (doubles ${parent.name})` : inst.name
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    // Clean up year fields: convert empty strings to null
     const payload = {
       ...form,
       student_birth_date: form.student_birth_date || null,
@@ -178,17 +209,40 @@ export default function SubmitPage() {
               onChange={v => updateField('student_first_name', v)}
               required
             />
-            <Input
+            <AutocompleteInput
               label="Last Name"
               value={form.student_last_name}
               onChange={v => updateField('student_last_name', v)}
+              onSearch={q => searchMusicians(q, form.student_first_name)}
+              onSelect={item => {
+                updateField('student_first_name', item.first_name)
+                updateField('student_last_name', item.last_name)
+              }}
+              renderItem={item => (
+                <>
+                  <span className="font-medium">{item.display_name}</span>
+                  {(item.birth_date || item.death_date) && (
+                    <span className="ml-2 text-stone-400">
+                      ({item.birth_date || '?'}–{item.death_date || ''})
+                    </span>
+                  )}
+                </>
+              )}
+              getItemKey={item => item.musician_id}
               required
             />
-            <Input
+            <AutocompleteInput
               label="Instrument"
               value={form.student_instrument}
               onChange={v => updateField('student_instrument', v)}
+              onSearch={searchInstruments}
+              onSelect={item => updateField('student_instrument', item.name)}
+              renderItem={item => (
+                <span>{formatInstrumentDisplay(item)}</span>
+              )}
+              getItemKey={item => item.id}
               placeholder="e.g., Oboe, Cello"
+              minChars={1}
             />
             <Input
               label="Nationality"
@@ -239,10 +293,26 @@ export default function SubmitPage() {
                     onChange={v => updateRelationship(i, 'teacher_first_name', v)}
                     required
                   />
-                  <Input
+                  <AutocompleteInput
                     label="Teacher Last Name"
                     value={rel.teacher_last_name}
                     onChange={v => updateRelationship(i, 'teacher_last_name', v)}
+                    onSearch={q => searchMusicians(q, rel.teacher_first_name)}
+                    onSelect={item => {
+                      updateRelationship(i, 'teacher_first_name', item.first_name)
+                      updateRelationship(i, 'teacher_last_name', item.last_name)
+                    }}
+                    renderItem={item => (
+                      <>
+                        <span className="font-medium">{item.display_name}</span>
+                        {(item.birth_date || item.death_date) && (
+                          <span className="ml-2 text-stone-400">
+                            ({item.birth_date || '?'}–{item.death_date || ''})
+                          </span>
+                        )}
+                      </>
+                    )}
+                    getItemKey={item => item.musician_id}
                     required
                   />
                   <div className="col-span-2">
@@ -260,10 +330,27 @@ export default function SubmitPage() {
                       ))}
                     </select>
                   </div>
-                  <Input
+                  <AutocompleteInput
                     label="Institution"
                     value={rel.institution_name}
                     onChange={v => updateRelationship(i, 'institution_name', v)}
+                    onSearch={searchInstitutions}
+                    onSelect={item => {
+                      updateRelationship(i, 'institution_name', item.name)
+                      if (item.city) updateRelationship(i, 'institution_city', item.city)
+                      if (item.country) updateRelationship(i, 'institution_country', item.country)
+                    }}
+                    renderItem={item => (
+                      <>
+                        <span className="font-medium">{item.name}</span>
+                        {(item.city || item.country) && (
+                          <span className="ml-2 text-stone-400">
+                            {[item.city, item.country].filter(Boolean).join(', ')}
+                          </span>
+                        )}
+                      </>
+                    )}
+                    getItemKey={item => item.id}
                     placeholder="e.g., Curtis Institute of Music"
                   />
                   <div className="grid grid-cols-2 gap-2">

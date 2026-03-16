@@ -6,6 +6,7 @@ from unidecode import unidecode
 from ..auth import require_admin
 from ..database import get_db
 from ..models import (
+    Instrument,
     Musician,
     MusicianInstrument,
     MusicianName,
@@ -40,7 +41,17 @@ def list_musicians(
     stmt = select(Musician).where(Musician.status == "active")
 
     if instrument:
-        stmt = stmt.join(MusicianInstrument).where(MusicianInstrument.instrument_id == instrument)
+        # Include companion instruments (parent + siblings) by default
+        inst = db.get(Instrument, instrument)
+        if inst:
+            parent_id = inst.parent_id if inst.parent_id else inst.id
+            family_stmt = select(Instrument.id).where(
+                (Instrument.id == parent_id) | (Instrument.parent_id == parent_id)
+            )
+            family_ids = [row[0] for row in db.execute(family_stmt).all()]
+        else:
+            family_ids = [instrument]
+        stmt = stmt.join(MusicianInstrument).where(MusicianInstrument.instrument_id.in_(family_ids))
 
     if q:
         normalized_q = normalize(q)

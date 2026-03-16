@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ ./backend/
 
 # Copy seed data CSVs
-COPY seed-musicians.csv seed-institutions.csv seed-lineage.csv ./
+COPY seed-musicians.csv seed-institutions.csv seed-instruments.csv seed-lineage.csv seed-sources.csv seed-lineage-sources.csv ./
 
 # Copy built frontend into backend/static for serving
 COPY --from=frontend-build /app/frontend/dist ./backend/static
