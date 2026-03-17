@@ -5,6 +5,7 @@ from unidecode import unidecode
 
 from ..database import get_db
 from ..models import Instrument, Musician, MusicianInstrument, MusicianName, Institution
+from ..rate_limit import check_autocomplete_rate
 from ..schemas import SearchResult, AutocompleteResult
 
 router = APIRouter(prefix="/api/v1/search", tags=["search"])
@@ -126,7 +127,8 @@ def global_search(
     return results
 
 
-@router.get("/autocomplete", response_model=list[AutocompleteResult])
+@router.get("/autocomplete", response_model=list[AutocompleteResult],
+             dependencies=[Depends(check_autocomplete_rate)])
 def autocomplete(
     q: str,
     limit: int = 8,

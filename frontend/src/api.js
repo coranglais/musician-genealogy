@@ -132,6 +132,6 @@ export function submitContribution(data) {
   });
 }
 
-export function checkSubmissionStatus(id, email) {
-  return request(`/submissions/${id}/status?email=${encodeURIComponent(email)}`);
+export function checkSubmissionStatus(token) {
+  return request(`/submissions/status/${token}`);
 }

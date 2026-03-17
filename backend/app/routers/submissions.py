@@ -1,6 +1,7 @@
+import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
@@ -16,9 +17,10 @@ from ..models import (
     SubmissionMetadata,
     SubmissionRecord,
 )
+from ..rate_limit import check_submission_rate
 from ..schemas import (
     StructuredSubmission,
-    SubmissionRead,
+    SubmissionAdminRead,
     SubmissionStatusCheck,
     SubmissionUpdate,
 )
@@ -33,12 +35,18 @@ def normalize(text: str) -> str:
 # --- Public endpoints ---
 
 
-@router.post("/api/v1/submissions", response_model=SubmissionStatusCheck, status_code=201)
+@router.post("/api/v1/submissions", response_model=SubmissionStatusCheck, status_code=201,
+              dependencies=[Depends(check_submission_rate)])
 def create_submission(body: StructuredSubmission, db: Session = Depends(get_db)):
-    # Honeypot check
+    # Honeypot check — silent rejection, return same shape as real submission
     if body.honeypot:
-        # Bots fill this in; silently accept but don't create anything
-        return SubmissionStatusCheck(id=0, status="submitted", created_at=datetime.now(timezone.utc))
+        fake_token = str(uuid.uuid4())
+        return SubmissionStatusCheck(
+            id=0, status="submitted", verification_token=fake_token,
+            created_at=datetime.now(timezone.utc),
+        )
+
+    token = str(uuid.uuid4())
 
     # Create submission metadata
     submission = SubmissionMetadata(
@@ -47,6 +55,7 @@ def create_submission(body: StructuredSubmission, db: Session = Depends(get_db))
         submission_type="new_relationship",
         notes=body.notes,
         verification_info=body.verification_info,
+        verification_token=token,
         status="submitted",
     )
     db.add(submission)
@@ -170,22 +179,26 @@ def create_submission(body: StructuredSubmission, db: Session = Depends(get_db))
     return SubmissionStatusCheck(
         id=submission.id,
         status=submission.status,
+        verification_token=submission.verification_token,
         created_at=submission.created_at,
     )
 
 
-@router.get("/api/v1/submissions/{submission_id}/status", response_model=SubmissionStatusCheck)
+@router.get("/api/v1/submissions/status/{token}", response_model=SubmissionStatusCheck)
 def check_submission_status(
-    submission_id: int,
-    email: str = Query(...),
+    token: str,
     db: Session = Depends(get_db),
 ):
-    submission = db.get(SubmissionMetadata, submission_id)
-    if not submission or submission.submitter_email != email:
+    """Public status check using verification token. Never returns submitter email."""
+    submission = db.execute(
+        select(SubmissionMetadata).where(SubmissionMetadata.verification_token == token)
+    ).scalar_one_or_none()
+    if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")
     return SubmissionStatusCheck(
         id=submission.id,
         status=submission.status,
+        editor_notes=submission.editor_notes,
         created_at=submission.created_at,
     )
 
@@ -193,7 +206,7 @@ def check_submission_status(
 # --- Admin endpoints ---
 
 
-@router.get("/api/v1/admin/submissions", response_model=list[SubmissionRead])
+@router.get("/api/v1/admin/submissions", response_model=list[SubmissionAdminRead])
 def list_submissions(
     status: str | None = None,
     page: int = 1,
@@ -213,7 +226,7 @@ def list_submissions(
     return db.execute(stmt).scalars().all()
 
 
-@router.get("/api/v1/admin/submissions/{submission_id}", response_model=SubmissionRead)
+@router.get("/api/v1/admin/submissions/{submission_id}", response_model=SubmissionAdminRead)
 def get_submission(
     submission_id: int,
     db: Session = Depends(get_db),
@@ -230,7 +243,7 @@ def get_submission(
     return submission
 
 
-@router.put("/api/v1/admin/submissions/{submission_id}", response_model=SubmissionRead)
+@router.put("/api/v1/admin/submissions/{submission_id}", response_model=SubmissionAdminRead)
 def update_submission(
     submission_id: int,
     body: SubmissionUpdate,
@@ -255,7 +268,7 @@ def update_submission(
     return db.execute(stmt).scalar_one()
 
 
-@router.put("/api/v1/admin/submissions/{submission_id}/approve", response_model=SubmissionRead)
+@router.put("/api/v1/admin/submissions/{submission_id}/approve", response_model=SubmissionAdminRead)
 def approve_submission(
     submission_id: int,
     db: Session = Depends(get_db),
@@ -287,7 +300,7 @@ def approve_submission(
     return db.execute(stmt).scalar_one()
 
 
-@router.put("/api/v1/admin/submissions/{submission_id}/reject", response_model=SubmissionRead)
+@router.put("/api/v1/admin/submissions/{submission_id}/reject", response_model=SubmissionAdminRead)
 def reject_submission(
     submission_id: int,
     body: SubmissionUpdate | None = None,

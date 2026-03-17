@@ -228,11 +228,15 @@ class SubmissionRecordRead(BaseModel):
     model_config = {"from_attributes": True}
 
 class SubmissionStatusCheck(BaseModel):
+    """Public response — never includes submitter_email."""
     id: int
     status: str
+    verification_token: Optional[str] = None
+    editor_notes: Optional[str] = None
     created_at: Optional[datetime] = None
 
-class SubmissionRead(BaseModel):
+class SubmissionAdminRead(BaseModel):
+    """Admin response — includes submitter_email for editor follow-up."""
     id: int
     submitter_name: str
     submitter_email: str
@@ -246,6 +250,9 @@ class SubmissionRead(BaseModel):
     reviewed_at: Optional[datetime] = None
     records: list[SubmissionRecordRead] = []
     model_config = {"from_attributes": True}
+
+# Keep SubmissionRead as alias for backward compatibility in admin imports
+SubmissionRead = SubmissionAdminRead
 
 class SubmissionUpdate(BaseModel):
     editor_notes: Optional[str] = None

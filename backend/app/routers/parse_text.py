@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..database import get_db
+from ..rate_limit import check_parse_text_rate
 from ..models import Musician, Institution
 from ..schemas import (
     FreeTextSubmission,
@@ -19,7 +20,8 @@ router = APIRouter(prefix="/api/v1/submissions", tags=["submissions"])
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 
-@router.post("/parse-text", response_model=ParsedSubmissionPreview)
+@router.post("/parse-text", response_model=ParsedSubmissionPreview,
+              dependencies=[Depends(check_parse_text_rate)])
 def parse_free_text(
     body: FreeTextSubmission,
     db: Session = Depends(get_db),
