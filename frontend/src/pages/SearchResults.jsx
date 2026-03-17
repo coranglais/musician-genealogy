@@ -2,33 +2,40 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { searchMusicians } from '../api'
 import MusicianCard from '../components/MusicianCard'
+import InstrumentFilter from '../components/InstrumentFilter'
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams()
   const q = searchParams.get('q') || ''
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+  const [instrument, setInstrument] = useState(null)
 
   useEffect(() => {
     if (!q) return
     setLoading(true)
-    searchMusicians(q)
+    searchMusicians(q, 1, 20, instrument)
       .then(setResults)
       .catch(() => setResults([]))
       .finally(() => setLoading(false))
-  }, [q])
+  }, [q, instrument])
 
   const musicians = results.filter(r => r.result_type === 'musician')
   const institutions = results.filter(r => r.result_type === 'institution')
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-stone-800 mb-1">
-        Search Results
-      </h1>
-      <p className="text-stone-500 mb-6">
-        {loading ? 'Searching...' : `${results.length} results for "${q}"`}
-      </p>
+      <div className="flex items-baseline justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-stone-800 mb-1">
+            Search Results
+          </h1>
+          <p className="text-stone-500">
+            {loading ? 'Searching...' : `${results.length} results for "${q}"`}
+          </p>
+        </div>
+        <InstrumentFilter value={instrument} onChange={setInstrument} />
+      </div>
 
       {!loading && results.length === 0 && q && (
         <div className="rounded-lg border border-stone-200 bg-white p-8 text-center">

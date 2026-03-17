@@ -9,8 +9,10 @@ async function request(path, options = {}) {
   return res.json();
 }
 
-export function searchMusicians(q, page = 1, perPage = 20) {
-  return request(`/search?q=${encodeURIComponent(q)}&page=${page}&per_page=${perPage}`);
+export function searchMusicians(q, page = 1, perPage = 20, instrument = null) {
+  let url = `/search?q=${encodeURIComponent(q)}&page=${page}&per_page=${perPage}`;
+  if (instrument) url += `&instrument=${instrument}`;
+  return request(url);
 }
 
 export function autocomplete(q, limit = 8) {

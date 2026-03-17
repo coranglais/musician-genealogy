@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SearchBar from '../components/SearchBar'
+import InstrumentFilter from '../components/InstrumentFilter'
 import { listMusicians } from '../api'
 import { SITE_NAME_SHORT } from '../constants'
 
@@ -15,10 +16,13 @@ const FEATURED = [
 
 export default function HomePage() {
   const [recentMusicians, setRecentMusicians] = useState([])
+  const [instrument, setInstrument] = useState(null)
 
   useEffect(() => {
-    listMusicians({ per_page: 12 }).then(setRecentMusicians).catch(() => {})
-  }, [])
+    const params = { per_page: 12 }
+    if (instrument) params.instrument = instrument
+    listMusicians(params).then(setRecentMusicians).catch(() => {})
+  }, [instrument])
 
   return (
     <div>
@@ -52,7 +56,10 @@ export default function HomePage() {
       </section>
 
       <section className="mt-12">
-        <h2 className="text-xl font-semibold text-stone-700 mb-4">Browse Musicians</h2>
+        <div className="flex items-baseline justify-between gap-4 mb-4">
+          <h2 className="text-xl font-semibold text-stone-700">Browse Musicians</h2>
+          <InstrumentFilter value={instrument} onChange={setInstrument} />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {recentMusicians.map(m => (
             <Link
