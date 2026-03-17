@@ -37,7 +37,10 @@ app.include_router(parse_text.router)
 
 @app.get("/api/v1/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "admin_configured": bool(os.getenv("ADMIN_PASSWORD")),
+    }
 
 
 # Serve frontend static files in production
