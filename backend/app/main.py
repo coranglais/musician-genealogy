@@ -37,15 +37,7 @@ app.include_router(parse_text.router)
 
 @app.get("/api/v1/health")
 def health():
-    # Diagnostic: find any env var containing ADMIN or PASSWORD in the name
-    admin_vars = [k for k in os.environ if "ADMIN" in k or "PASSWORD" in k]
-    return {
-        "status": "ok",
-        "admin_configured": bool(os.getenv("ADMIN_PASSWORD")),
-        "database_configured": bool(os.getenv("DATABASE_URL")),
-        "env_var_count": len(os.environ),
-        "admin_related_vars": admin_vars,
-    }
+    return {"status": "ok"}
 
 
 # Serve frontend static files in production
