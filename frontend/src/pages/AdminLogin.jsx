@@ -16,7 +16,7 @@ export default function AdminLogin({ onLogin }) {
         onLogin()
         navigate('/admin')
       } else {
-        setError('Invalid password')
+        setError(res.message || 'Invalid password')
       }
     } catch {
       setError('Login failed')

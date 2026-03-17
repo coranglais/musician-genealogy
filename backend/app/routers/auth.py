@@ -3,6 +3,8 @@ import os
 from fastapi import APIRouter, Response
 
 from ..auth import ADMIN_PASSWORD, SESSION_COOKIE_NAME
+
+IS_PRODUCTION = bool(os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY_PROJECT_ID"))
 from ..schemas import LoginRequest, LoginResponse
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -18,6 +20,7 @@ def login(body: LoginRequest, response: Response):
         key=SESSION_COOKIE_NAME,
         value="authenticated",
         httponly=True,
+        secure=IS_PRODUCTION,
         samesite="lax",
         max_age=60 * 60 * 24,  # 24 hours
     )
