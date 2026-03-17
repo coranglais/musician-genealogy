@@ -3,7 +3,7 @@ import os
 from fastapi import Depends, HTTPException, Request
 
 
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 SESSION_COOKIE_NAME = "session"
 
 

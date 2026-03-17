@@ -10,6 +10,8 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 @router.post("/login", response_model=LoginResponse)
 def login(body: LoginRequest, response: Response):
+    if not ADMIN_PASSWORD:
+        return LoginResponse(message="Admin login is disabled")
     if body.password != ADMIN_PASSWORD:
         return LoginResponse(message="Invalid password")
     response.set_cookie(
