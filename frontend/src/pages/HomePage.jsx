@@ -5,10 +5,12 @@ import { listMusicians } from '../api'
 import { SITE_NAME_SHORT } from '../constants'
 
 const FEATURED = [
-  { id: 4, name: 'Marcel Tabuteau', desc: 'Founder of the American school of oboe' },
   { id: 1, name: 'Georges Gillet', desc: 'Father of the French oboe school' },
-  { id: 5, name: 'John de Lancie', desc: 'Curtis lineage, Philadelphia Orchestra' },
+  { id: 4, name: 'Marcel Tabuteau', desc: 'Founder of the American school of oboe' },
+  { id: 12, name: 'Laila Storch', desc: 'Performer, historian, author of Marcel Tabuteau' },
   { id: 7, name: 'John Mack', desc: 'Cleveland Orchestra, legendary pedagogue' },
+  { id: 18, name: 'Elaine Douvas', desc: 'Met Opera principal, Juilliard faculty' },
+  { id: 28, name: 'Nancy Ambrose King', desc: 'University of Michigan, orchestral soloist' },
 ]
 
 export default function HomePage() {
@@ -34,7 +36,7 @@ export default function HomePage() {
 
       <section className="mt-8">
         <h2 className="text-xl font-semibold text-stone-700 mb-4">Featured Lineages</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {FEATURED.map(f => (
             <Link
               key={f.id}
