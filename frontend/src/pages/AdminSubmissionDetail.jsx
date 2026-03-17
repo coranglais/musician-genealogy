@@ -6,7 +6,10 @@ import {
   rejectSubmission,
   listPendingMusicians,
   listPendingLineage,
+  editPendingMusician,
 } from '../api'
+import AutocompleteInput from '../components/AutocompleteInput'
+import { searchNationalities } from '../utils/nationalities'
 
 export default function AdminSubmissionDetail() {
   const { id } = useParams()
@@ -156,25 +159,11 @@ export default function AdminSubmissionDetail() {
           <h3 className="text-sm font-medium text-stone-500 mb-2">Pending Musicians</h3>
           <div className="space-y-2">
             {linkedMusicians.map(m => (
-              <div
-                key={m.id}
-                className="rounded-md border border-stone-200 bg-white p-3 text-sm"
-              >
-                <span className="font-medium text-stone-800">
-                  {m.first_name} {m.last_name}
-                </span>
-                {m.birth_date && (
-                  <span className="ml-2 text-stone-400">
-                    ({m.birth_date}{m.death_date ? `–${m.death_date}` : ''})
-                  </span>
-                )}
-                {m.nationality && (
-                  <span className="ml-2 text-stone-400">{m.nationality}</span>
-                )}
-                {m.bio_notes && (
-                  <p className="mt-1 text-stone-500">{m.bio_notes}</p>
-                )}
-              </div>
+              <PendingMusicianCard key={m.id} musician={m} onUpdate={(id, data) => {
+                editPendingMusician(id, data).then(updated => {
+                  setPendingMusicians(prev => prev.map(pm => pm.id === id ? { ...pm, ...updated } : pm))
+                }).catch(() => {})
+              }} />
             ))}
           </div>
         </div>
@@ -276,6 +265,60 @@ export default function AdminSubmissionDetail() {
             </button>
           )}
         </div>
+      )}
+    </div>
+  )
+}
+
+function PendingMusicianCard({ musician: m, onUpdate }) {
+  const [nationality, setNationality] = useState(m.nationality || '')
+
+  function handleSelect(item) {
+    setNationality(item.name)
+    onUpdate(m.id, { nationality: item.name })
+  }
+
+  function handleBlur() {
+    if (nationality !== (m.nationality || '')) {
+      onUpdate(m.id, { nationality: nationality || null })
+    }
+  }
+
+  return (
+    <div className="rounded-md border border-stone-200 bg-white p-3 text-sm">
+      <div className="flex items-baseline gap-2">
+        <span className="font-medium text-stone-800">
+          {m.first_name} {m.last_name}
+        </span>
+        {m.birth_date && (
+          <span className="text-stone-400">
+            ({m.birth_date}{m.death_date ? `–${m.death_date}` : ''})
+          </span>
+        )}
+      </div>
+      <div className="mt-2 max-w-xs">
+        <AutocompleteInput
+          label="Nationality"
+          value={nationality}
+          onChange={setNationality}
+          onSearch={searchNationalities}
+          onSelect={handleSelect}
+          renderItem={item => (
+            <span>
+              {item.display}
+              {item.section === 'compound' && (
+                <span className="ml-1 text-stone-400 text-xs">compound</span>
+              )}
+            </span>
+          )}
+          getItemKey={item => item.display}
+          placeholder="e.g., American, French"
+          minChars={1}
+          onBlur={handleBlur}
+        />
+      </div>
+      {m.bio_notes && (
+        <p className="mt-2 text-stone-500">{m.bio_notes}</p>
       )}
     </div>
   )

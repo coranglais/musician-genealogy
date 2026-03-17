@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { submitContribution, autocomplete, listInstitutions, listInstruments } from '../api'
 import { SITE_NAME_SHORT } from '../constants'
 import AutocompleteInput from '../components/AutocompleteInput'
+import { searchNationalities } from '../utils/nationalities'
 
 const RELATIONSHIP_TYPES = [
   { value: 'formal_study', label: 'Conservatory / University Study' },
@@ -244,10 +245,23 @@ export default function SubmitPage() {
               placeholder="e.g., Oboe, Cello"
               minChars={1}
             />
-            <Input
+            <AutocompleteInput
               label="Nationality"
               value={form.student_nationality}
               onChange={v => updateField('student_nationality', v)}
+              onSearch={searchNationalities}
+              onSelect={item => updateField('student_nationality', item.name)}
+              renderItem={item => (
+                <span>
+                  {item.display}
+                  {item.section === 'compound' && (
+                    <span className="ml-1 text-stone-400 text-xs">compound</span>
+                  )}
+                </span>
+              )}
+              getItemKey={item => item.display}
+              placeholder="e.g., American, French"
+              minChars={1}
             />
             <Input
               label="Birth Year"

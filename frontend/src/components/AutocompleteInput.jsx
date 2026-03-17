@@ -11,6 +11,7 @@ export default function AutocompleteInput({
   required = false,
   placeholder = '',
   minChars = 2,
+  onBlur,
 }) {
   const [suggestions, setSuggestions] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
@@ -77,6 +78,7 @@ export default function AutocompleteInput({
         value={value}
         onChange={e => onChange(e.target.value)}
         onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
+        onBlur={onBlur}
         onKeyDown={handleKeyDown}
         required={required}
         placeholder={placeholder}
