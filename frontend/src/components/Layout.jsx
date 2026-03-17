@@ -20,11 +20,11 @@ export default function Layout({ isAdmin, onLogout }) {
             <Link to="/about" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
               About
             </Link>
-            <Link to="/submit" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
-              Contribute
-            </Link>
             <Link to="/how-it-works" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
               How It Works
+            </Link>
+            <Link to="/submit" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
+              Contribute
             </Link>
           </div>
           <div className="flex items-center gap-4">
