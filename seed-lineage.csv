@@ -116,6 +116,21 @@ teacher_id,teacher_name,student_id,student_name,institution_id,institution_name,
 69,Stolper,86,Sorrels,11,Indiana U Jacobs,formal_study,,,Graduate studies,medium
 33,Underwood,86,Sorrels,,,private_study,,,,medium
 12,Storch,91,Genovese,,,private_study,,,,high
+97,Aronov,96,Morozova,21,Manhattan School of Music,formal_study,,,,high
+98,Mekler,96,Morozova,37,Special Music School,formal_study,1973,1979,,high
+99,Bruk,96,Morozova,37,Special Music School,formal_study,1979,1981,,high
+100,Orlovskaya,96,Morozova,36,Rimsky-Korsakov College,formal_study,1981,1985,,high
+101,Shakin,96,Morozova,35,St. Petersburg Conservatory,formal_study,1988,1990,,high
+102,Savshinsky,97,Aronov,35,Rimsky-Korsakov Conservatory,formal_study,,,,medium
+109,Smirnova,101,Shakin,,,formal_study,,,,medium
+100,Orlovskaya,101,Shakin,36,Rimsky-Korsakov College,formal_study,,,,medium
+103,Serebryakov,101,Shakin,35,St. Petersburg Conservatory,formal_study,,,,medium
+110,Nilsen,101,Shakin,35,St. Petersburg Conservatory,formal_study,,,,medium
+104,Nikolayev,103,Serebryakov,35,Leningrad Conservatory,formal_study,,,,high
+105,Safonov,104,Nikolayev,38,Moscow Conservatory,formal_study,,,1900,high
+106,Leschetizky,105,Safonov,35,St. Petersburg Conservatory,formal_study,,,,high
+107,Czerny,106,Leschetizky,,,private_study,,,Vienna,high
+108,Beethoven,107,Czerny,,,private_study,1801,1803,Vienna,high
 92,Minsker,91,Genovese,,,private_study,,,,high
 4,Tabuteau,91,Genovese,2,Curtis,formal_study,,,,high
 91,Genovese,80,Wilson,,,private_study,,,,medium

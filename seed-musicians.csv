@@ -94,3 +94,18 @@ id,last_name,first_name,birth_date,death_date,nationality,instrument,bio_notes,c
 93,Bond,Yari,,,,American,Cello,"Precollege faculty Manhattan School of Music. Faculty Columbia University. Founder of Concerts Con Brio. Founding member and artistic director of Carnegie Chamber Players. Studied with Leonard Rose and Channing Robbins at Juilliard.",high
 94,Rose,Leonard,1918,1984,American,Cello,"Principal cello Cleveland Orchestra and New York Philharmonic. Faculty Juilliard and Curtis. One of the most influential cello pedagogues of the 20th century.",high
 95,Robbins,Channing,1932,2019,American,Cello,"Principal cello New York Philharmonic (1966-2001). Faculty Juilliard.",high
+96,Morozova,Irina,1966,,Russian/American,Piano,"Pianist and teacher. Faculty Mannes College of Music and Special Music School/Kaufman Center.",high
+97,Aronov,Arkady,,,,Russian,Piano,"Professor of Piano Rimsky-Korsakov Conservatory (1960-77). Faculty Mannes and Manhattan School of Music.",medium
+98,Mekler,Maria,,,,Russian,Piano,,low
+99,Bruk,Sima,,,,Russian,Piano,,low
+100,Orlovskaya,Galina,,,,Russian,Piano,Faculty Rimsky-Korsakov College of Music.,low
+101,Shakin,Vladimir Olegovich,1954,,,Russian,Piano,"Faculty St. Petersburg Conservatory.",medium
+102,Savshinsky,Samary,,,,Russian,Piano,Faculty Rimsky-Korsakov Conservatory.,low
+103,Serebryakov,Pavel Alexeyevich,1909,1977,Russian,Piano,"Professor and Rector of Leningrad Conservatory.",medium
+104,Nikolayev,Leonid Vladimirovich,1878,1942,Russian,Piano,"Pianist, teacher and composer. Faculty Moscow Philharmonic School and St. Petersburg Conservatory.",medium
+105,Safonov,Vasily Il'ich,1852,1918,Russian,Piano,"Conductor, pianist and teacher. Director of Moscow Conservatory.",medium
+106,Leschetizky,Theodor,1830,1915,Polish,Piano,"Pianist, teacher and composer. Had at least 1200 students. Head of piano department St. Petersburg Conservatory.",high
+107,Czerny,Carl,1791,1857,Austrian,Piano,"Piano teacher, composer, pianist, theorist, historian.",high
+108,Beethoven,Ludwig van,1770,1827,German,Piano,"Pianist, composer.",high
+109,Smirnova,Tatyana,,,,Russian,Piano,,low
+110,Nilsen,Vladimir,,,,Russian,Piano,Faculty St. Petersburg Conservatory.,low
