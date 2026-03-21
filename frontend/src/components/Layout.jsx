@@ -20,6 +20,9 @@ export default function Layout({ isAdmin, onLogout }) {
             <Link to="/about" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
               About
             </Link>
+            <Link to="/instruments" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
+              Browse
+            </Link>
             <Link to="/how-it-works" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
               How It Works
             </Link>

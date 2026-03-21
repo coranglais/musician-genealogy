@@ -52,6 +52,14 @@ export function listInstruments() {
   return request('/instruments');
 }
 
+export function getInstrument(id) {
+  return request(`/instruments`).then(instruments => instruments.find(i => i.id === id));
+}
+
+export function getMusiciansForInstrument(id, includeCompanions = true, page = 1, perPage = 50) {
+  return request(`/instruments/${id}/musicians?include_companions=${includeCompanions}&page=${page}&per_page=${perPage}`);
+}
+
 // --- Auth ---
 
 export function login(password) {

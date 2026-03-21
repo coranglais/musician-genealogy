@@ -11,6 +11,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import HowItWorksPage from './pages/HowItWorksPage'
 import AdminReviewQueue from './pages/AdminReviewQueue'
 import AdminSubmissionDetail from './pages/AdminSubmissionDetail'
+import InstrumentsPage from './pages/InstrumentsPage'
+import InstrumentDetail from './pages/InstrumentDetail'
 
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false)
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/musician/:id" element={<MusicianDetail />} />
+        <Route path="/instruments" element={<InstrumentsPage />} />
+        <Route path="/instrument/:id" element={<InstrumentDetail />} />
         <Route path="/admin/login" element={<AdminLogin onLogin={() => setIsAdmin(true)} />} />
         <Route
           path="/admin"
