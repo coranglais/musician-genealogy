@@ -180,7 +180,7 @@ export default function SubmitPage() {
         {/* Your info */}
         <fieldset>
           <legend className="text-lg font-semibold text-stone-700 mb-3">Your Information</legend>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Your Name"
               value={form.submitter_name}
@@ -203,7 +203,7 @@ export default function SubmitPage() {
           <p className="text-sm text-stone-400 mb-3">
             The person who studied. This might be you!
           </p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="First Name"
               value={form.student_first_name}
@@ -300,7 +300,7 @@ export default function SubmitPage() {
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     label="Teacher First Name"
                     value={rel.teacher_first_name}
@@ -329,7 +329,7 @@ export default function SubmitPage() {
                     getItemKey={item => item.musician_id}
                     required
                   />
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-stone-600 mb-1">
                       Relationship Type
                     </label>
@@ -367,7 +367,7 @@ export default function SubmitPage() {
                     getItemKey={item => item.id}
                     placeholder="e.g., Curtis Institute of Music"
                   />
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <Input
                       label="City"
                       value={rel.institution_city}
@@ -391,7 +391,7 @@ export default function SubmitPage() {
                     onChange={v => updateRelationship(i, 'end_year', v)}
                     placeholder="e.g., 1994"
                   />
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <Input
                       label="Notes"
                       value={rel.notes}

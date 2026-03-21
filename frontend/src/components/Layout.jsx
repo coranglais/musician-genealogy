@@ -13,17 +13,17 @@ export default function Layout({ isAdmin, onLogout }) {
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <header className="bg-stone-800 text-stone-100 shadow-md">
         <div className="mx-auto max-w-6xl flex items-center justify-between px-4 py-3">
-          <div className="flex items-baseline gap-4">
-            <Link to="/" className="text-xl font-semibold tracking-tight hover:text-amber-300 transition-colors">
+          <div className="flex items-baseline gap-2 sm:gap-4 min-w-0">
+            <Link to="/" className="text-xl font-semibold tracking-tight hover:text-amber-300 transition-colors shrink-0">
               {SITE_NAME_SHORT}
             </Link>
-            <Link to="/about" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
+            <Link to="/about" className="hidden sm:inline text-sm text-stone-400 hover:text-amber-300 transition-colors">
               About
             </Link>
             <Link to="/instruments" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
               Browse
             </Link>
-            <Link to="/how-it-works" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">
+            <Link to="/how-it-works" className="hidden md:inline text-sm text-stone-400 hover:text-amber-300 transition-colors">
               How It Works
             </Link>
             <Link to="/submit" className="text-sm text-stone-400 hover:text-amber-300 transition-colors">

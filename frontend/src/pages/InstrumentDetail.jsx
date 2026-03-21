@@ -78,13 +78,13 @@ export default function InstrumentDetail() {
       )}
 
       {/* Controls */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <p className="text-sm text-stone-500">
           {loading ? 'Loading...' : `${musicians.length}${hasMore ? '+' : ''} musicians`}
         </p>
         {hasCompanions && (
           <label className="flex items-center gap-2 cursor-pointer select-none">
-            <span className="text-sm text-stone-500">
+            <span className="text-sm text-stone-500 truncate max-w-48 sm:max-w-none">
               Include {companions.map(c => c.name).join(', ')}
             </span>
             <button

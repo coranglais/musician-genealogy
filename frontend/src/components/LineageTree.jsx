@@ -489,12 +489,12 @@ export default function LineageTree({ musicianId, musicianName }) {
   return (
     <div className="rounded-xl border border-stone-200 bg-white shadow-sm overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-stone-200 px-4 py-2.5 bg-stone-50">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-200 px-4 py-2.5 bg-stone-50">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
           <h3 className="text-sm font-semibold text-stone-600 tracking-wide uppercase">
             Lineage Tree
           </h3>
-          <div className="flex items-center gap-3 text-xs text-stone-500">
+          <div className="hidden sm:flex items-center gap-3 text-xs text-stone-500">
             <span className="flex items-center gap-1.5">
               <span className="inline-block w-5 h-0.5 bg-amber-700"></span> Primary
             </span>
@@ -508,7 +508,7 @@ export default function LineageTree({ musicianId, musicianName }) {
         </div>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 cursor-pointer select-none">
-            <span className="text-xs text-stone-500">Show all connections</span>
+            <span className="text-xs text-stone-500">Show all</span>
             <button
               role="switch"
               aria-checked={showAll}
@@ -528,16 +528,16 @@ export default function LineageTree({ musicianId, musicianName }) {
             className="rounded px-2 py-1 text-xs text-stone-500 hover:bg-stone-200 hover:text-stone-700 transition-colors"
             title="Reset zoom"
           >
-            Reset view
+            Reset
           </button>
         </div>
       </div>
 
       {/* Tree canvas */}
-      <div ref={containerRef} className="relative h-[550px] bg-stone-50/50 cursor-grab active:cursor-grabbing">
+      <div ref={containerRef} className="relative h-[400px] sm:h-[550px] bg-stone-50/50 cursor-grab active:cursor-grabbing">
         <svg ref={svgRef} className="w-full h-full" />
-        <div className="absolute bottom-3 right-3 text-xs text-stone-400">
-          Scroll to zoom &middot; Drag to pan &middot; Click node to visit &middot; Click + to expand
+        <div className="absolute bottom-2 right-2 text-[10px] sm:text-xs text-stone-400">
+          Pinch/scroll to zoom &middot; Drag to pan
         </div>
       </div>
     </div>

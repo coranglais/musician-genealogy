@@ -109,7 +109,7 @@ export default function MusicianDetail() {
         <h1 className="text-3xl font-bold text-stone-800">
           {musician.first_name} {musician.last_name}
         </h1>
-        <div className="mt-2 flex items-center gap-3 text-stone-500">
+        <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3 text-stone-500">
           {dates && <span className="text-lg">{dates}</span>}
           {musician.nationality && <span>{musician.nationality}</span>}
           {instruments.length > 0 && (

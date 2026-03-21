@@ -25,7 +25,7 @@ export default function SearchResults() {
 
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-4 mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-stone-800 mb-1">
             Search Results
