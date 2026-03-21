@@ -60,6 +60,14 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/api/v1/config/public")
+def public_config():
+    return {
+        "site_name": os.getenv("SITE_NAME", "The Musician Genealogy Project"),
+        "contact_email": os.getenv("CONTACT_EMAIL", ""),
+    }
+
+
 # Serve frontend static files in production
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 if STATIC_DIR.is_dir():

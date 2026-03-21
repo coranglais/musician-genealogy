@@ -13,6 +13,7 @@ import AdminReviewQueue from './pages/AdminReviewQueue'
 import AdminSubmissionDetail from './pages/AdminSubmissionDetail'
 import InstrumentsPage from './pages/InstrumentsPage'
 import InstrumentDetail from './pages/InstrumentDetail'
+import ContactPage from './pages/ContactPage'
 
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false)
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/musician/:id" element={<MusicianDetail />} />
         <Route path="/instruments" element={<InstrumentsPage />} />
         <Route path="/instrument/:id" element={<InstrumentDetail />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/admin/login" element={<AdminLogin onLogin={() => setIsAdmin(true)} />} />
         <Route
           path="/admin"

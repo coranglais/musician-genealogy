@@ -60,6 +60,12 @@ export function getMusiciansForInstrument(id, includeCompanions = true, page = 1
   return request(`/instruments/${id}/musicians?include_companions=${includeCompanions}&page=${page}&per_page=${perPage}`);
 }
 
+// --- Config ---
+
+export function getPublicConfig() {
+  return request('/config/public');
+}
+
 // --- Auth ---
 
 export function login(password) {

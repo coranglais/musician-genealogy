@@ -56,6 +56,10 @@ export default function Layout({ isAdmin, onLogout }) {
       <footer className="mt-16 border-t border-stone-200 py-6 text-center text-sm text-stone-400">
         <span>{SITE_NAME}</span>
         <span className="mx-2">·</span>
+        <Link to="/contact" className="hover:text-stone-600 transition-colors">
+          Contact
+        </Link>
+        <span className="mx-2">·</span>
         <Link to="/privacy" className="hover:text-stone-600 transition-colors">
           Privacy Policy
         </Link>
