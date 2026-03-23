@@ -9,7 +9,7 @@ import os
 import sys
 
 from unidecode import unidecode
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 # Ensure the backend directory is on sys.path
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -281,6 +281,25 @@ def load_lineage_sources(db):
         print(f"  Lineage sources: {count_new} new, {count_skipped} skipped")
 
 
+def reset_sequences(db):
+    """Reset PostgreSQL sequences to max(id) + 1 so new inserts don't collide with seeded data."""
+    url = str(engine.url)
+    if not url.startswith("postgresql"):
+        return  # SQLite doesn't use sequences
+
+    tables = ["musicians", "institutions", "instruments", "lineage", "sources", "lineage_sources",
+              "musician_instruments", "musician_names", "institution_names", "submission_metadata", "submission_records"]
+    for table in tables:
+        try:
+            db.execute(text(
+                f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), COALESCE(MAX(id), 1)) FROM {table}"
+            ))
+        except Exception:
+            pass  # Table may not exist yet or have no sequence
+    db.flush()
+    print("  Sequences reset.")
+
+
 def seed():
     print("Seeding database...")
     db = SessionLocal()
@@ -291,6 +310,7 @@ def seed():
         load_lineage(db)
         load_sources(db)
         load_lineage_sources(db)
+        reset_sequences(db)
         db.commit()
         print("Seed complete.")
     except Exception:
