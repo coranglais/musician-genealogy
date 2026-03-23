@@ -445,14 +445,22 @@ export default function SubmitPage() {
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-md bg-stone-800 px-6 py-2.5 text-sm font-medium text-white
-            hover:bg-stone-700 transition-colors disabled:opacity-50"
-        >
-          {loading ? 'Submitting...' : 'Submit for Review'}
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded-md bg-stone-800 px-6 py-2.5 text-sm font-medium text-white
+              hover:bg-stone-700 transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Submitting...' : 'Submit for Review'}
+          </button>
+          <p className="text-xs text-stone-400">
+            By submitting, you agree to our{' '}
+            <a href="/privacy" className="underline hover:text-stone-600 transition-colors">
+              privacy policy
+            </a>.
+          </p>
+        </div>
       </form>
     </div>
   )
