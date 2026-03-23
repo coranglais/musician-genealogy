@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { autocomplete } from '../api'
 
-export default function SearchBar({ compact = false, autoFocus = false }) {
+export default function SearchBar({ compact = false, autoFocus = false, onNavigate }) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
@@ -51,6 +51,7 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`)
     }
     setShowDropdown(false)
+    onNavigate?.()
   }
 
   function handleKeyDown(e) {
@@ -101,6 +102,7 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
                   navigate(`/musician/${s.musician_id}`)
                   setShowDropdown(false)
                   setQuery('')
+                  onNavigate?.()
                 }}
               >
                 <span className="font-medium">{s.display_name}</span>
@@ -117,6 +119,7 @@ export default function SearchBar({ compact = false, autoFocus = false }) {
               onClick={() => {
                 navigate(`/search?q=${encodeURIComponent(query.trim())}`)
                 setShowDropdown(false)
+                onNavigate?.()
               }}
             >
               Search all results for "<span className="font-medium text-stone-700">{query}</span>"
