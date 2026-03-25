@@ -11,7 +11,7 @@ from unidecode import unidecode
 
 from ..auth import require_admin
 from ..database import get_db
-from ..email_service import send_verification_email
+from ..email_service import send_decision_email, send_verification_email
 from ..models import (
     Institution,
     Instrument,
@@ -352,6 +352,7 @@ def update_submission(
 @router.put("/api/v1/admin/submissions/{submission_id}/approve", response_model=SubmissionAdminRead)
 def approve_submission(
     submission_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _admin=Depends(require_admin),
 ):
@@ -373,6 +374,15 @@ def approve_submission(
     submission.reviewed_at = datetime.now(timezone.utc)
     db.commit()
 
+    # Notify submitter
+    musician_name = _get_submission_musician_name(db, submission)
+    background_tasks.add_task(
+        send_decision_email,
+        to_email=submission.submitter_email,
+        decision="approved",
+        musician_name=musician_name,
+    )
+
     stmt = (
         select(SubmissionMetadata)
         .options(selectinload(SubmissionMetadata.records))
@@ -384,6 +394,7 @@ def approve_submission(
 @router.put("/api/v1/admin/submissions/{submission_id}/reject", response_model=SubmissionAdminRead)
 def reject_submission(
     submission_id: int,
+    background_tasks: BackgroundTasks,
     body: SubmissionUpdate | None = None,
     db: Session = Depends(get_db),
     _admin=Depends(require_admin),
@@ -398,6 +409,9 @@ def reject_submission(
     if submission.status not in ("submitted", "under_review"):
         raise HTTPException(status_code=400, detail=f"Cannot reject submission with status '{submission.status}'")
 
+    # Grab musician name before deleting pending records
+    musician_name = _get_submission_musician_name(db, submission)
+
     # Delete all linked pending records — lineage first (FK deps), then institutions, then musicians
     for rec in sorted(submission.records, key=lambda r: {"lineage": 0, "institution": 1, "musician": 2}.get(r.record_type, 3)):
         _delete_pending_record(db, rec.record_type, rec.record_id)
@@ -407,6 +421,15 @@ def reject_submission(
     if body and body.editor_notes is not None:
         submission.editor_notes = body.editor_notes
     db.commit()
+
+    # Notify submitter
+    background_tasks.add_task(
+        send_decision_email,
+        to_email=submission.submitter_email,
+        decision="rejected",
+        musician_name=musician_name,
+        editor_notes=submission.editor_notes,
+    )
 
     stmt = (
         select(SubmissionMetadata)
@@ -634,6 +657,16 @@ def purge_expired_unverified(db: Session) -> int:
 
 
 # --- Helpers ---
+
+
+def _get_submission_musician_name(db: Session, submission: SubmissionMetadata) -> str | None:
+    """Extract the student musician name from a submission's linked records."""
+    for rec in submission.records:
+        if rec.record_type == "musician":
+            musician = db.get(Musician, rec.record_id)
+            if musician:
+                return f"{musician.first_name} {musician.last_name}"
+    return None
 
 
 def _find_existing_musician(db: Session, first_name: str, last_name: str) -> Musician | None:
