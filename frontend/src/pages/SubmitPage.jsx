@@ -137,15 +137,16 @@ export default function SubmitPage() {
   if (submitted) {
     return (
       <div className="max-w-xl mx-auto text-center py-12">
-        <h1 className="text-2xl font-bold text-stone-800 mb-4">Thank you!</h1>
+        <h1 className="text-2xl font-bold text-stone-800 mb-4">Check your email</h1>
         <p className="text-stone-600 mb-2">
-          Your submission has been received and will be reviewed by our editors.
+          We've sent a verification link to <span className="font-medium">{form.submitter_email}</span>.
+        </p>
+        <p className="text-stone-600 mb-4">
+          Please click the link to confirm your submission. Once verified, our editors
+          will review it.
         </p>
         <p className="text-sm text-stone-400">
-          Submission ID: <span className="font-mono">{submitted.id}</span>
-        </p>
-        <p className="text-sm text-stone-400 mt-1">
-          You can check the status anytime using your submission ID and email.
+          The link expires in 7 days. If you don't see the email, check your spam folder.
         </p>
         <button
           onClick={() => { setSubmitted(null); setForm({ ...form, relationships: [{ ...EMPTY_RELATIONSHIP }] }) }}

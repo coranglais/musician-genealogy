@@ -1,4 +1,6 @@
+import logging
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -7,14 +9,34 @@ from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from .database import SessionLocal
 from .routers import auth, musicians, lineage, instruments, institutions, search, sources, submissions, parse_text
 
+logger = logging.getLogger(__name__)
+
 IS_PRODUCTION = bool(os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY_PROJECT_ID"))
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Purge expired unverified submissions on startup
+    db = SessionLocal()
+    try:
+        count = submissions.purge_expired_unverified(db)
+        if count:
+            logger.info("Startup: purged %d expired unverified submissions", count)
+    except Exception:
+        logger.exception("Startup: failed to purge expired submissions")
+    finally:
+        db.close()
+    yield
+
 
 app = FastAPI(
     title="Musician Genealogy API",
     description="Pedagogical genealogies of musicians — who studied with whom, where, and when.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
@@ -65,6 +87,7 @@ def public_config():
     return {
         "site_name": os.getenv("SITE_NAME", "The Musician Genealogy Project"),
         "contact_email": os.getenv("CONTACT_EMAIL", ""),
+        "verification_expiry_days": int(os.getenv("VERIFICATION_TOKEN_EXPIRY_DAYS", "7")),
     }
 
 

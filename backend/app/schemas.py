@@ -234,6 +234,7 @@ class SubmissionStatusCheck(BaseModel):
     verification_token: Optional[str] = None
     editor_notes: Optional[str] = None
     created_at: Optional[datetime] = None
+    message: Optional[str] = None
 
 class SubmissionAdminRead(BaseModel):
     """Admin response — includes submitter_email for editor follow-up."""

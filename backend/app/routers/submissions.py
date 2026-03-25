@@ -1,19 +1,23 @@
+import logging
+import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from unidecode import unidecode
 
 from ..auth import require_admin
 from ..database import get_db
+from ..email_service import send_verification_email
 from ..models import (
     Institution,
+    Instrument,
     Lineage,
     Musician,
     MusicianInstrument,
-    Instrument,
     SubmissionMetadata,
     SubmissionRecord,
 )
@@ -25,7 +29,11 @@ from ..schemas import (
     SubmissionUpdate,
 )
 
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["submissions"])
+
+EXPIRY_DAYS = int(os.environ.get("VERIFICATION_TOKEN_EXPIRY_DAYS", "7"))
+APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://localhost:5173")
 
 
 def normalize(text: str) -> str:
@@ -35,18 +43,27 @@ def normalize(text: str) -> str:
 # --- Public endpoints ---
 
 
-@router.post("/api/v1/submissions", response_model=SubmissionStatusCheck, status_code=201,
+@router.post("/api/v1/submissions", response_model=SubmissionStatusCheck, status_code=202,
               dependencies=[Depends(check_submission_rate)])
-def create_submission(body: StructuredSubmission, db: Session = Depends(get_db)):
+def create_submission(
+    body: StructuredSubmission,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     # Honeypot check — silent rejection, return same shape as real submission
     if body.honeypot:
         fake_token = str(uuid.uuid4())
         return SubmissionStatusCheck(
-            id=0, status="submitted", verification_token=fake_token,
+            id=0, status="unverified", verification_token=fake_token,
             created_at=datetime.now(timezone.utc),
+            message=f"Submission received. Please check your email to verify. The link expires in {EXPIRY_DAYS} days.",
         )
 
     token = str(uuid.uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(days=EXPIRY_DAYS)
+
+    # Build a musician name for the verification email subject
+    musician_name = f"{body.student_first_name} {body.student_last_name}"
 
     # Create submission metadata
     submission = SubmissionMetadata(
@@ -56,7 +73,8 @@ def create_submission(body: StructuredSubmission, db: Session = Depends(get_db))
         notes=body.notes,
         verification_info=body.verification_info,
         verification_token=token,
-        status="submitted",
+        token_expires_at=expires_at,
+        status="unverified",
     )
     db.add(submission)
     db.flush()
@@ -176,11 +194,71 @@ def create_submission(body: StructuredSubmission, db: Session = Depends(get_db))
     db.commit()
     db.refresh(submission)
 
+    # Queue verification email (sent asynchronously in background)
+    background_tasks.add_task(
+        send_verification_email,
+        to_email=body.submitter_email,
+        verification_token=token,
+        musician_name=musician_name,
+    )
+
     return SubmissionStatusCheck(
         id=submission.id,
         status=submission.status,
         verification_token=submission.verification_token,
         created_at=submission.created_at,
+        message=f"Submission received. Please check your email to verify. The link expires in {EXPIRY_DAYS} days.",
+    )
+
+
+@router.get("/api/v1/submissions/verify/{token}")
+def verify_submission(token: str, db: Session = Depends(get_db)):
+    """
+    Email verification endpoint.
+    Flips status from 'unverified' -> 'submitted' so editors can see it.
+    Redirects the user to a confirmation page on the frontend.
+    """
+    submission = db.execute(
+        select(SubmissionMetadata).where(
+            SubmissionMetadata.verification_token == token,
+        )
+    ).scalar_one_or_none()
+
+    # Token not found
+    if submission is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Invalid or expired verification link.",
+        )
+
+    # Already verified
+    if submission.status != "unverified":
+        return RedirectResponse(
+            url=f"{APP_BASE_URL}/submissions/already-verified",
+            status_code=303,
+        )
+
+    # Token expired
+    if (
+        submission.token_expires_at
+        and datetime.now(timezone.utc) > submission.token_expires_at
+    ):
+        raise HTTPException(
+            status_code=410,
+            detail="This verification link has expired.",
+        )
+
+    # Verify
+    submission.status = "submitted"
+    submission.verified_at = datetime.now(timezone.utc)
+    submission.verification_token = None  # single-use token
+    db.commit()
+
+    logger.info("Submission %s verified by %s", submission.id, submission.submitter_email)
+
+    return RedirectResponse(
+        url=f"{APP_BASE_URL}/submissions/verified",
+        status_code=303,
     )
 
 
@@ -222,6 +300,9 @@ def list_submissions(
     )
     if status:
         stmt = stmt.where(SubmissionMetadata.status == status)
+    else:
+        # By default, hide unverified submissions from admin queue
+        stmt = stmt.where(SubmissionMetadata.status != "unverified")
     stmt = stmt.offset(offset).limit(per_page)
     return db.execute(stmt).scalars().all()
 
@@ -518,6 +599,38 @@ def edit_pending_lineage(
     db.commit()
     db.refresh(lineage)
     return {"id": lineage.id, "status": lineage.status}
+
+
+# --- Purge expired unverified submissions ---
+
+
+def purge_expired_unverified(db: Session) -> int:
+    """
+    Delete submission_metadata rows (and their pending records) that are
+    still 'unverified' past the expiry window. Called on app startup.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=EXPIRY_DAYS)
+
+    expired = db.execute(
+        select(SubmissionMetadata)
+        .options(selectinload(SubmissionMetadata.records))
+        .where(
+            SubmissionMetadata.status == "unverified",
+            SubmissionMetadata.created_at < cutoff,
+        )
+    ).scalars().all()
+
+    for sub in expired:
+        # Delete linked pending records (lineage first, then institutions, then musicians)
+        for rec in sorted(sub.records, key=lambda r: {"lineage": 0, "institution": 1, "musician": 2}.get(r.record_type, 3)):
+            _delete_pending_record(db, rec.record_type, rec.record_id)
+        db.delete(sub)
+
+    if expired:
+        db.commit()
+        logger.info("Purged %d expired unverified submissions", len(expired))
+
+    return len(expired)
 
 
 # --- Helpers ---

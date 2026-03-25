@@ -14,6 +14,7 @@ import AdminSubmissionDetail from './pages/AdminSubmissionDetail'
 import InstrumentsPage from './pages/InstrumentsPage'
 import InstrumentDetail from './pages/InstrumentDetail'
 import ContactPage from './pages/ContactPage'
+import VerificationResult from './pages/VerificationResult'
 
 export default function App() {
   const [isAdmin, setIsAdmin] = useState(false)
@@ -24,6 +25,8 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/submit" element={<SubmitPage />} />
+        <Route path="/submissions/verified" element={<VerificationResult />} />
+        <Route path="/submissions/already-verified" element={<VerificationResult />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/search" element={<SearchResults />} />

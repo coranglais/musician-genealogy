@@ -49,13 +49,14 @@ If you are a musician listed in our database and wish to have your information c
 
 ## Data Storage and Security
 
-Submission data is stored in a secured database hosted by Railway (a cloud hosting provider). Access to contributor email addresses and submission metadata is restricted to site editors.
+Submission data is stored in a secured database hosted by Railway (a cloud hosting provider). Verification emails are sent via Resend, a transactional email service provider. Both services process data solely on our behalf and are not permitted to use it for their own purposes. Access to contributor email addresses and submission metadata is restricted to site editors.
 
 We use reasonable security measures appropriate for a non-commercial community project, including encrypted connections (HTTPS), secure session handling, and access controls on administrative functions.
 
 ## Data Retention
 
-- Contributor email addresses are retained for as long as needed to process and verify submissions. You may request deletion of your email address at any time by contacting us.
+- Unverified submissions are automatically deleted after 14 days, including the associated email address.
+- For verified submissions, contributor email addresses are retained while a submission is being reviewed and for a reasonable period afterward in case editors need to follow up. You may request deletion of your email address at any time by contacting us.
 - Publicly displayed musician data is retained indefinitely as part of the reference database, consistent with the project's archival purpose.
 - Server access logs are retained for a limited period for security purposes.
 
