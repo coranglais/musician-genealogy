@@ -12,18 +12,20 @@ Web app for exploring pedagogical genealogies of musicians — who studied with 
 | Search | unidecode for diacritical normalization; pg_trgm for fuzzy matching (Postgres only) |
 | Tree Viz | D3.js (d3.hierarchy + d3.tree, bidirectional layout) |
 | AI | Anthropic Claude API (Haiku for submission parsing) |
+| Email | Resend (async SDK) for transactional emails |
 
 ## Project Structure
 
 ```
 backend/
   app/
-    main.py          # FastAPI app, CORS, router registration
+    main.py          # FastAPI app, CORS, router registration, lifespan (startup purge)
     models.py        # All SQLAlchemy models (12 tables)
     schemas.py       # Pydantic request/response schemas
     database.py      # Engine, session, Base
     auth.py          # Session cookie admin auth
     rate_limit.py    # IP-based rate limiting
+    email_service.py # Resend integration: verification, approval, rejection emails
     seed_data.py     # Idempotent CSV loader (python -m app.seed_data)
     routers/         # auth, musicians, lineage, instruments, institutions, search, submissions, sources, parse_text
   alembic/           # Migrations (auto-generated from models)
@@ -32,7 +34,7 @@ backend/
 frontend/
   src/
     main.jsx, App.jsx, api.js, index.css, constants.js
-    pages/           # HomePage, SearchResults, MusicianDetail, AboutPage, SubmitPage, HowItWorksPage, PrivacyPolicy, AdminLogin, AdminReviewQueue, AdminSubmissionDetail
+    pages/           # HomePage, SearchResults, MusicianDetail, AboutPage, SubmitPage, HowItWorksPage, PrivacyPolicy, VerificationResult, InstrumentsPage, InstrumentDetail, ContactPage, AdminLogin, AdminReviewQueue, AdminSubmissionDetail
     components/      # Layout, SearchBar, AutocompleteInput, MusicianCard, LineageTree, InstrumentFilter
     content/         # features.md, privacy-policy.md, nationalities.json
   vite.config.js     # Tailwind plugin + API proxy to :8000
@@ -96,6 +98,11 @@ Frontend dev server proxies `/api` requests to `http://127.0.0.1:8000`.
 - `DATABASE_URL` — defaults to `sqlite:///./musician_genealogy.db` (set by Railway Postgres plugin)
 - `ADMIN_PASSWORD` — defaults to `admin` (set a real one in Railway)
 - `ANTHROPIC_API_KEY` — for AI-assisted submission parsing (Phase 3)
+- `RESEND_API_KEY` — for transactional emails (verification, approval/rejection notifications)
+- `RESEND_FROM_EMAIL` — sender address, defaults to `Musician Genealogy Project <noreply@mail.musician-genealogy.org>`
+- `APP_BASE_URL` — production URL for email links, defaults to `http://localhost:5173`
+- `VERIFICATION_TOKEN_EXPIRY_DAYS` — days before unverified submissions are purged, defaults to `7`
+- `CONTACT_EMAIL` — displayed on privacy policy page (via `/api/v1/config/public`)
 - `CORS_ORIGINS` — defaults to `http://localhost:5173` (not needed in production, same-origin)
 - `PORT` — set by Railway automatically
 
@@ -128,16 +135,20 @@ Frontend dev server proxies `/api` requests to `http://127.0.0.1:8000`.
 - Source citations: CRUD API, seed data, included in lineage responses
 - About page, How It Works page, Privacy Policy page
 - Nationalities reference list for submissions
-- **Not done**: Email verification (SMTP/Resend), admin research endpoint, responsive design, institution detail pages
+- Email verification via Resend: submissions start as 'unverified', verification email sent on submit, token click flips to 'submitted'
+- Approval/rejection notification emails to submitters
+- Expired unverified submissions purged on startup (configurable via VERIFICATION_TOKEN_EXPIRY_DAYS)
+- Privacy policy dynamically inlines contact email and expiry days from env vars
+- **Not done**: admin research endpoint, responsive design, institution detail pages
 
 ### Phase 4: SEO and Growth — NOT STARTED
 - SEO-friendly URLs, Open Graph tags, analytics
 - "What's New" changelog widget (future idea)
 
-### Phase 5: Multi-Instrument & i18n — NOT STARTED
-- i18n / react-i18next localization
-- `/instrument/:id` browse page
-- Trusted contributor role, bulk import tools
+### Phase 5: Multi-Instrument & i18n — PARTIALLY STARTED
+- `/instruments` browse page and `/instrument/:id` detail page — COMPLETE
+- i18n / react-i18next localization — NOT STARTED
+- Trusted contributor role, bulk import tools — NOT STARTED
 
 ## Data
 
