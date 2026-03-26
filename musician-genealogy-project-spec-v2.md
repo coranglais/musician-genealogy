@@ -725,15 +725,29 @@ A Claude API call (Haiku model) parses this into structured candidate records:
 - Lineage 1: teacher=John Mack, student=[submitter], institution=CIM, type=formal_study, start=1990, end=1994
 - Lineage 2: teacher=Heinz Holliger, student=[submitter], institution=Lucerne Festival, type=masterclass
 
-The parsed records are shown back to the submitter for review and correction before submission. The submitter can fix errors, add details, or remove incorrect entries. Only after confirmation does the system create pending database records.
+The parsed records are shown back to the submitter as friendly, editable cards (NOT raw JSON). The submitter can fix errors, add details, or remove incorrect entries. Only after confirmation does the system create pending database records via the existing submission endpoint — same email verification, same pending/unverified flow, same admin review queue. There is one submission flow, not two.
+
+**UX design:** The `/submit` page has a segmented control at the top: "Describe it" (free-text, default) | "Fill in fields" (structured form). Switching modes preserves state in both — no data loss on toggle. Free-text mode has a "Start Over" button that clears parsed results but preserves the original text for revision. All failure modes (API down, rate limit, parse failure) offer the structured form as a fallback.
 
 Implementation:
 - Endpoint: POST /api/v1/submissions/parse-text
-- Input: free-text string + submitter name/email
-- Calls Claude API (claude-haiku-4-5-20251001) with a system prompt containing the list of existing active musicians and institutions from the database for name matching
-- Returns structured candidate records for submitter review
-- On submitter confirmation, creates real musician/lineage/institution rows with status='pending', plus submission_metadata (status='unverified') linking them. Sends verification email. Records only enter the editor queue after email confirmation.
-- The AI prompt should attempt to match names against existing active records to avoid duplicate musician creation. If a match is found, use the existing musician ID. If no match, create a pending musician.
+- Input: free-text string (max 2000 chars) + submitter name
+- Calls Claude API (claude-haiku-4-5-20251001) with a system prompt that instructs extraction only. **The prompt does NOT contain the list of existing musicians/institutions.** Name matching is done server-side after parsing, using the existing pg_trgm fuzzy search pipeline. This keeps the prompt small (cheaper), eliminates the exfiltration target (more secure), and produces better matches (database search > LLM string matching).
+- Claude returns JSON; server validates against a strict schema and discards anything that doesn't parse. Raw Claude output is never exposed to the user.
+- Server-side post-processing: fuzzy-match extracted names against musicians and institutions tables, attach existing IDs where matches are found, flag unmatched names as "new — will be created if approved."
+- Returns structured candidate records for submitter review as editable UI cards.
+- On submitter confirmation, calls the existing `POST /api/v1/submissions` endpoint with structured data. Existing flow: pending records created → verification email → admin review.
+
+Prompt injection defenses:
+- User input wrapped in `<untrusted_user_input>` tags in the prompt
+- No sensitive context in the prompt (no musician/institution list)
+- Strict output schema validation (non-conforming responses discarded)
+- max_tokens: 1000, temperature: 0
+- Input length cap: 2000 characters
+- Rate limit: 10 calls per IP per day
+- Anomalous inputs/outputs logged for review but never exposed to user
+
+**Detailed implementation spec:** See `nl-submission-parsing-spec.md` for full backend implementation, prompt design, frontend wireframes, failure mode UX, and build order.
 
 Cost: Haiku is fractions of a cent per call. ~200 tokens in, ~300 out. Thousands of submissions for under a dollar.
 
@@ -795,7 +809,7 @@ Submitter email addresses are personally identifiable information. They must be 
 ### Input Validation
 - All user-submitted text fields must be sanitized to prevent XSS. React handles this by default for rendered content, but any server-side rendering of user input (e.g., in emails) must be escaped.
 - The honeypot field rejection should be silent — don't tell the bot its submission was rejected.
-- Verify that the AI parse-text endpoint cannot be used to exfiltrate the system prompt or the list of existing musicians/institutions passed to it (prompt injection defense).
+- Prompt injection defense for the AI parse-text endpoint: user input wrapped in `<untrusted_user_input>` tags, no sensitive data in prompt (musician/institution list is NOT included — matching is done server-side), strict output schema validation, raw Claude output never exposed to user. See `nl-submission-parsing-spec.md` for full defense design.
 
 ### HTTPS
 - Railway provides HTTPS automatically. Ensure all HTTP requests redirect to HTTPS.
