@@ -11,7 +11,7 @@ Web app for exploring pedagogical genealogies of musicians — who studied with 
 | Frontend | React (Vite), Tailwind CSS v4 (@tailwindcss/vite plugin), React Router |
 | Search | unidecode for diacritical normalization; pg_trgm for fuzzy matching (Postgres only) |
 | Tree Viz | D3.js (d3.hierarchy + d3.tree, bidirectional layout) |
-| AI | Anthropic Claude API (Haiku for submission parsing) |
+| AI | Anthropic Claude API (Sonnet for submission parsing) |
 | Email | Resend (async SDK) for transactional emails |
 
 ## Project Structure
@@ -31,6 +31,8 @@ backend/
   alembic/           # Migrations (auto-generated from models)
   alembic.ini
   requirements.txt
+  tests/
+    test_parse_text.py # Live API integration tests for NL parsing (23 tests)
 frontend/
   src/
     main.jsx, App.jsx, api.js, index.css, constants.js
@@ -60,6 +62,19 @@ npm run dev
 ```
 
 Frontend dev server proxies `/api` requests to `http://127.0.0.1:8000`.
+
+## Testing
+
+```bash
+# Parse-text integration tests (from backend/, requires ANTHROPIC_API_KEY)
+# These hit the live Claude API — ~2 min, not for every commit.
+# Run periodically to catch regressions when the model changes.
+set -a && source ../.env && set +a
+pip install pytest httpx  # one-time
+python -m pytest tests/test_parse_text.py -v
+```
+
+Covers: legitimate inputs, name extraction rules, date handling (explicit, relative, vague), city vs institution, inferred fields, user-facing language (no jargon), and 5 prompt injection vectors.
 
 ## Implementation Rules — Do Not Deviate
 
