@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime, timezone
 
 import anthropic
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,18 +10,35 @@ from sqlalchemy.orm import Session
 from unidecode import unidecode
 
 from ..database import get_db
-from ..models import Institution, InstitutionName, Musician, MusicianName
+from ..models import Instrument, Institution, InstitutionName, Musician, MusicianName
 from ..rate_limit import check_parse_text_rate
 from ..schemas import (
     CandidateLineage,
     CandidateMusician,
     ParseTextRequest,
     ParseTextResponse,
+    SubmitterInstrument,
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/submissions", tags=["submissions"])
+
+# Map internal field names → friendly labels for user-facing text.
+# Ordered longest-first so "institution_name" matches before "institution".
+_FIELD_DISPLAY_NAMES = {
+    "relationship_type": "relationship type",
+    "institution_name": "school",
+    "instrument": "instrument",
+    "start_year": "start year",
+    "end_year": "end year",
+    "teacher_name": "teacher",
+    "inferred_fields": "assumed fields",
+    "formal_study": "formal study",
+    "private_study": "private lessons",
+    "masterclass": "masterclass",
+    "informal": "informal mentorship",
+}
 
 SYSTEM_PROMPT = """You are a data extraction tool for a musician genealogy database. Your job
 is to parse free-text descriptions of musical education into structured
@@ -29,6 +47,7 @@ records.
 Extract teacher-student relationships from the text below. For each
 relationship, identify:
 - Teacher name
+- Instrument studied (e.g., oboe, piano, violin — if mentioned)
 - Institution name (expand abbreviations ONLY for well-known music
   institutions, e.g., CIM → Cleveland Institute of Music,
   NEC → New England Conservatory)
@@ -37,6 +56,10 @@ relationship, identify:
 - Start year and end year if explicitly stated
 - Any notes about the relationship
 
+Also extract any instrument(s) the submitter mentions playing or studying,
+even if not tied to a specific relationship.
+
+Today's date is: {today}
 The submitter's name is: {submitter_name}
 Unless stated otherwise, assume the submitter is the student in each
 relationship described.
@@ -46,35 +69,54 @@ Return ONLY a JSON object matching this exact schema, with no other text:
   "lineages": [
     {{
       "teacher_name": "Name exactly as given in text",
+      "instrument": "instrument name or null",
       "institution_name": "Full Institution Name or null",
       "relationship_type": "formal_study",
       "start_year": 1990,
       "end_year": 1994,
-      "notes": "any additional context or null"
+      "notes": "any additional context or null",
+      "inferred_fields": ["relationship_type"]
     }}
   ],
+  "submitter_instruments": ["oboe"],
   "parse_notes": "any caveats about ambiguous or unclear information, or null"
 }}
 
 Rules:
 - If the text does not contain any teacher-student relationships, return
-  {{"lineages": [], "parse_notes": "No relationships found"}}
+  {{"lineages": [], "submitter_instruments": [], "parse_notes": "No relationships found"}}
 - If information is ambiguous, include it with a note in parse_notes
 - Do not invent information not present in the text
+- For each lineage, include an "inferred_fields" array listing any field
+  names where you made an assumption rather than extracting an explicit
+  value from the text. For example, if the text says "studied with" but
+  does not specify whether it was at a conservatory or private lessons,
+  include "relationship_type" in inferred_fields. If the text explicitly
+  says "masterclass", relationship_type is NOT inferred. An empty array
+  means all fields were explicitly stated.
 - Extract ONLY names that appear in the text. If the text says "Holliger",
   return "Holliger" — do NOT expand to a full name unless the full name
   is explicitly stated. Never guess a first name.
 - If only a city or country is mentioned without a specific institution,
   set institution_name to null and include the location in the notes
   field (e.g., "in Bern" → institution_name: null, notes: "in Bern").
-- For vague time references like "in the 1970s", "sometime in the 80s",
-  or "around 1960", do NOT convert these to start_year/end_year. Set
-  both to null and include the time reference in the notes field. Only
-  extract specific years when they are explicitly stated (e.g., "from
-  1990 to 1994").
+- For vague decade references like "in the 1970s" or "sometime in the
+  80s", do NOT convert these to start_year/end_year. Set both to null
+  and include the time reference in the notes field.
+- For relative time references like "last week", "last summer", "recently",
+  or "a few years ago", use today's date to infer the year and set
+  start_year accordingly. Include "inferred from relative reference" in
+  the notes and add "start_year" to inferred_fields.
+- Only set start_year/end_year to specific years when they are explicitly
+  stated (e.g., "from 1990 to 1994") or can be reliably inferred from
+  a relative reference.
 - Expand institution abbreviations ONLY where the expansion is
   unambiguous in a musical context. If unsure, return the abbreviation
-  as-is and note the ambiguity in parse_notes."""
+  as-is and note the ambiguity in parse_notes.
+- In parse_notes, use plain language a non-technical user would
+  understand. Say "school" not "institution_name", "start year" not
+  "start_year". Never use the word "null" — say "left blank" or
+  "not specified" instead."""
 
 
 def normalize(text: str) -> str:
@@ -157,6 +199,31 @@ def _fuzzy_match_institution(name: str, db: Session) -> tuple[int | None, str | 
     return None, None
 
 
+def _fuzzy_match_instrument(name: str, db: Session) -> tuple[int | None, str | None]:
+    """Match an instrument name. Returns (id_or_none, canonical_name_or_none)."""
+    if not name:
+        return None, None
+    norm = normalize(name)
+
+    # Case-insensitive exact match
+    exact = db.execute(
+        select(Instrument).where(Instrument.name.ilike(norm))
+        .limit(1)
+    ).scalars().first()
+    if exact:
+        return exact.id, exact.name
+
+    # Contains match
+    contains = db.execute(
+        select(Instrument).where(Instrument.name.ilike(f"%{norm}%"))
+        .limit(1)
+    ).scalars().first()
+    if contains:
+        return contains.id, contains.name
+
+    return None, None
+
+
 @router.post("/parse-text", response_model=ParseTextResponse,
               dependencies=[Depends(check_parse_text_rate)])
 def parse_free_text(body: ParseTextRequest, db: Session = Depends(get_db)):
@@ -165,7 +232,8 @@ def parse_free_text(body: ParseTextRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail="AI parsing not configured")
 
     # Call Claude Sonnet — no DB context in prompt
-    prompt = SYSTEM_PROMPT.format(submitter_name=body.submitter_name)
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    prompt = SYSTEM_PROMPT.format(submitter_name=body.submitter_name, today=today)
     user_message = f"<untrusted_user_input>\n{body.text}\n</untrusted_user_input>"
 
     try:
@@ -221,6 +289,10 @@ def parse_free_text(body: ParseTextRequest, db: Session = Depends(get_db)):
         institution_name = rel.get("institution_name")
         inst_id, inst_canonical = _fuzzy_match_institution(institution_name, db) if institution_name else (None, None)
 
+        # Match instrument
+        instrument_name = rel.get("instrument")
+        instr_id, instr_canonical = _fuzzy_match_instrument(instrument_name, db) if instrument_name else (None, None)
+
         # Determine overall confidence
         confidence = teacher_confidence
         if inst_id and teacher_confidence == "medium":
@@ -232,6 +304,8 @@ def parse_free_text(body: ParseTextRequest, db: Session = Depends(get_db)):
             teacher_last_name=teacher_last,
             teacher_existing_id=teacher_id,
             student_name=body.submitter_name,
+            instrument=instr_canonical or instrument_name,
+            instrument_existing_id=instr_id,
             institution_name=inst_canonical or institution_name,
             institution_existing_id=inst_id,
             relationship_type=rel.get("relationship_type", "formal_study"),
@@ -239,6 +313,7 @@ def parse_free_text(body: ParseTextRequest, db: Session = Depends(get_db)):
             end_year=rel.get("end_year"),
             notes=rel.get("notes"),
             confidence=confidence,
+            inferred_fields=rel.get("inferred_fields", []),
         ))
 
         # Track new musicians (teachers not matched to existing)
@@ -253,9 +328,31 @@ def parse_free_text(body: ParseTextRequest, db: Session = Depends(get_db)):
                     confidence="low",
                 )
 
+    # Match submitter instruments
+    submitter_instruments = []
+    for instr_name in parsed.get("submitter_instruments", []):
+        instr_id, instr_canonical = _fuzzy_match_instrument(instr_name, db)
+        submitter_instruments.append(SubmitterInstrument(
+            name=instr_canonical or instr_name,
+            existing_id=instr_id,
+        ))
+
+    # Replace internal field names and jargon with friendly labels in parse_notes
+    parse_notes = parsed.get("parse_notes")
+    if parse_notes:
+        for internal, friendly in _FIELD_DISPLAY_NAMES.items():
+            parse_notes = parse_notes.replace(internal, friendly)
+        # Catch any remaining "null" — replace with context-appropriate phrasing
+        parse_notes = parse_notes.replace(" to null", " to blank")
+        parse_notes = parse_notes.replace(" as null", " as blank")
+        parse_notes = parse_notes.replace(" is null", " was left blank")
+        parse_notes = parse_notes.replace(" set to null", " left blank")
+        parse_notes = parse_notes.replace("null", "not specified")
+
     return ParseTextResponse(
         candidate_lineages=candidate_lineages,
         candidate_musicians=list(new_musicians.values()),
+        submitter_instruments=submitter_instruments,
         raw_text=body.text,
-        parse_notes=parsed.get("parse_notes"),
+        parse_notes=parse_notes,
     )

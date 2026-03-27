@@ -239,11 +239,11 @@ def verify_submission(token: str, db: Session = Depends(get_db)):
             status_code=303,
         )
 
-    # Token expired
-    if (
-        submission.token_expires_at
-        and datetime.now(timezone.utc) > submission.token_expires_at
-    ):
+    # Token expired (handle naive datetimes from SQLite)
+    expires_at = submission.token_expires_at
+    if expires_at and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at and datetime.now(timezone.utc) > expires_at:
         raise HTTPException(
             status_code=410,
             detail="This verification link has expired.",

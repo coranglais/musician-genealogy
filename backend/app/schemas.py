@@ -308,6 +308,8 @@ class CandidateLineage(BaseModel):
     teacher_first_name: Optional[str] = None
     teacher_existing_id: Optional[int] = None
     student_name: str
+    instrument: Optional[str] = None
+    instrument_existing_id: Optional[int] = None
     institution_name: Optional[str] = None
     institution_existing_id: Optional[int] = None
     relationship_type: str
@@ -315,6 +317,7 @@ class CandidateLineage(BaseModel):
     end_year: Optional[int] = None
     notes: Optional[str] = None
     confidence: str  # "high", "medium", "low"
+    inferred_fields: list[str] = []
 
 class CandidateMusician(BaseModel):
     name: str
@@ -323,9 +326,14 @@ class CandidateMusician(BaseModel):
     existing_id: Optional[int] = None
     confidence: str
 
+class SubmitterInstrument(BaseModel):
+    name: str
+    existing_id: Optional[int] = None
+
 class ParseTextResponse(BaseModel):
     candidate_lineages: list[CandidateLineage]
     candidate_musicians: list[CandidateMusician]
+    submitter_instruments: list[SubmitterInstrument] = []
     raw_text: str
     parse_notes: Optional[str] = None
 
