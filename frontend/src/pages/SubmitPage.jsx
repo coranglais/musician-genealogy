@@ -16,6 +16,16 @@ const RELATIONSHIP_TYPES = [
 
 const RELATIONSHIP_LABEL = Object.fromEntries(RELATIONSHIP_TYPES.map(r => [r.value, r.label]))
 
+const FIELD_LABELS = {
+  relationship_type: 'Relationship Type',
+  institution_name: 'School',
+  instrument: 'Instrument',
+  start_year: 'Start Year',
+  end_year: 'End Year',
+  teacher_name: 'Teacher',
+  notes: 'Notes',
+}
+
 const EMPTY_RELATIONSHIP = {
   teacher_first_name: '',
   teacher_last_name: '',
@@ -114,12 +124,15 @@ export default function SubmitPage() {
       teacher_first_name: '',
       teacher_last_name: '',
       teacher_existing_id: null,
+      instrument: '',
+      instrument_existing_id: null,
       institution_name: '',
       institution_existing_id: null,
       relationship_type: 'formal_study',
       start_year: '',
       end_year: '',
       notes: '',
+      inferred_fields: [],
     }])
   }
 
@@ -164,11 +177,17 @@ export default function SubmitPage() {
       }
 
       // Convert API response to editable card format
+      // Pre-fill instrument from submitter_instruments if card has none
+      const defaultInstrument = result.submitter_instruments?.[0]?.name || ''
+      const defaultInstrumentId = result.submitter_instruments?.[0]?.existing_id || null
+
       const cards = result.candidate_lineages.map(cl => ({
         teacher_first_name: cl.teacher_first_name || '',
         teacher_last_name: cl.teacher_last_name || '',
         teacher_name: cl.teacher_name,
         teacher_existing_id: cl.teacher_existing_id,
+        instrument: cl.instrument || defaultInstrument,
+        instrument_existing_id: cl.instrument_existing_id || defaultInstrumentId,
         institution_name: cl.institution_name || '',
         institution_existing_id: cl.institution_existing_id,
         relationship_type: cl.relationship_type || 'formal_study',
@@ -176,6 +195,7 @@ export default function SubmitPage() {
         end_year: cl.end_year != null ? String(cl.end_year) : '',
         notes: cl.notes || '',
         confidence: cl.confidence,
+        inferred_fields: cl.inferred_fields || [],
       }))
 
       setParsedCards(cards)
@@ -288,7 +308,9 @@ export default function SubmitPage() {
             setParsedCards(null)
             setFreeText('')
             setOriginalText('')
-            setForm(prev => ({ ...prev, relationships: [{ ...EMPTY_RELATIONSHIP }] }))
+            setParseFeedback('')
+            setVerificationInfo('')
+            setForm(prev => ({ ...prev, relationships: [{ ...EMPTY_RELATIONSHIP }], notes: '' }))
           }}
           className="mt-6 rounded-md bg-stone-800 px-4 py-2 text-sm font-medium text-white
             hover:bg-stone-700 transition-colors"
@@ -517,6 +539,7 @@ export default function SubmitPage() {
                       <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-stone-600 mb-1">
                           Relationship Type
+                          <InferredHint fields={card.inferred_fields} fieldName="relationship_type" />
                         </label>
                         <select
                           value={card.relationship_type}
@@ -532,7 +555,35 @@ export default function SubmitPage() {
 
                       <div>
                         <AutocompleteInput
-                          label="Institution"
+                          label="Instrument"
+                          value={card.instrument || ''}
+                          onChange={v => {
+                            updateCard(i, 'instrument', v)
+                            updateCard(i, 'instrument_existing_id', null)
+                          }}
+                          onSearch={searchInstruments}
+                          onSelect={item => {
+                            updateCard(i, 'instrument', item.name)
+                            updateCard(i, 'instrument_existing_id', item.id)
+                          }}
+                          renderItem={item => (
+                            <span>{formatInstrumentDisplay(item)}</span>
+                          )}
+                          getItemKey={item => item.id}
+                          placeholder="e.g., Oboe, Cello"
+                          minChars={1}
+                        />
+                        {card.instrument_existing_id ? (
+                          <span className="text-xs text-emerald-600 mt-1 inline-block">Matched</span>
+                        ) : card.instrument ? (
+                          <span className="text-xs text-amber-600 mt-1 inline-block">Not recognized</span>
+                        ) : null}
+                        <InferredHint fields={card.inferred_fields} fieldName="instrument" />
+                      </div>
+
+                      <div>
+                        <AutocompleteInput
+                          label="School"
                           value={card.institution_name}
                           onChange={v => {
                             updateCard(i, 'institution_name', v)
@@ -561,20 +612,27 @@ export default function SubmitPage() {
                         ) : card.institution_name ? (
                           <span className="text-xs text-amber-600 mt-1 inline-block">New &mdash; will be created if approved</span>
                         ) : null}
+                        <InferredHint fields={card.inferred_fields} fieldName="institution_name" />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          label="Start Year"
-                          value={card.start_year}
-                          onChange={v => updateCard(i, 'start_year', v)}
-                          placeholder="e.g., 1990"
-                        />
-                        <Input
-                          label="End Year"
-                          value={card.end_year}
-                          onChange={v => updateCard(i, 'end_year', v)}
-                          placeholder="e.g., 1994"
-                        />
+                        <div>
+                          <Input
+                            label="Start Year"
+                            value={card.start_year}
+                            onChange={v => updateCard(i, 'start_year', v)}
+                            placeholder="e.g., 1990"
+                          />
+                          <InferredHint fields={card.inferred_fields} fieldName="start_year" />
+                        </div>
+                        <div>
+                          <Input
+                            label="End Year"
+                            value={card.end_year}
+                            onChange={v => updateCard(i, 'end_year', v)}
+                            placeholder="e.g., 1994"
+                          />
+                          <InferredHint fields={card.inferred_fields} fieldName="end_year" />
+                        </div>
                       </div>
                       <div className="sm:col-span-2">
                         <Input
@@ -935,6 +993,29 @@ export default function SubmitPage() {
         )}
       </form>
     </div>
+  )
+}
+
+function InferredHint({ fields, fieldName }) {
+  if (!fields || !fields.includes(fieldName)) return null
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-stone-400 ml-2">
+      <span className="text-amber-500">&#8505;&#65039;</span> assumed — correct?
+    </span>
+  )
+}
+
+function InferredFieldsSummary({ fields }) {
+  if (!fields || fields.length === 0) return null
+  const labels = fields.map(f => FIELD_LABELS[f] || f)
+  return (
+    <p className="text-xs text-stone-400 mt-2">
+      <span className="text-amber-500">&#8505;&#65039;</span>{' '}
+      {labels.length === 1
+        ? <>{labels[0]} was assumed</>
+        : <>{labels.slice(0, -1).join(', ')} and {labels[labels.length - 1]} were assumed</>
+      } — please verify.
+    </p>
   )
 }
 
