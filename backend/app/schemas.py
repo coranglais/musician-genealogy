@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 # --- Instruments ---
@@ -245,6 +245,7 @@ class SubmissionAdminRead(BaseModel):
     notes: Optional[str] = None
     verification_info: Optional[str] = None
     original_text: Optional[str] = None
+    parse_feedback: Optional[str] = None
     status: str
     editor_notes: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -273,6 +274,7 @@ class StructuredSubmission(BaseModel):
     relationships: list["SubmittedRelationship"] = []
     notes: Optional[str] = None
     verification_info: Optional[str] = None
+    parse_feedback: Optional[str] = None
     honeypot: Optional[str] = None
 
 class SubmittedRelationship(BaseModel):
@@ -293,24 +295,39 @@ class FreeTextSubmission(BaseModel):
     verification_info: Optional[str] = None
     honeypot: Optional[str] = None
 
-class ParsedSubmissionPreview(BaseModel):
-    """Returned by the AI parsing endpoint for submitter review."""
-    student: "ParsedMusician"
-    relationships: list["ParsedRelationship"] = []
 
-class ParsedMusician(BaseModel):
-    first_name: str
-    last_name: str
-    existing_id: Optional[int] = None
-    instrument: Optional[str] = None
+# --- Parse Text (AI extraction) ---
 
-class ParsedRelationship(BaseModel):
-    teacher: ParsedMusician
+class ParseTextRequest(BaseModel):
+    text: str = Field(..., max_length=2000)
+    submitter_name: str = Field(..., max_length=200)
+
+class CandidateLineage(BaseModel):
+    teacher_name: str
+    teacher_last_name: Optional[str] = None
+    teacher_first_name: Optional[str] = None
+    teacher_existing_id: Optional[int] = None
+    student_name: str
     institution_name: Optional[str] = None
-    institution_city: Optional[str] = None
-    relationship_type: str = "formal_study"
+    institution_existing_id: Optional[int] = None
+    relationship_type: str
     start_year: Optional[int] = None
     end_year: Optional[int] = None
+    notes: Optional[str] = None
+    confidence: str  # "high", "medium", "low"
+
+class CandidateMusician(BaseModel):
+    name: str
+    last_name: Optional[str] = None
+    first_name: Optional[str] = None
+    existing_id: Optional[int] = None
+    confidence: str
+
+class ParseTextResponse(BaseModel):
+    candidate_lineages: list[CandidateLineage]
+    candidate_musicians: list[CandidateMusician]
+    raw_text: str
+    parse_notes: Optional[str] = None
 
 
 # --- Auth ---

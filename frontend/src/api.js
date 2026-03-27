@@ -146,6 +146,24 @@ export function submitContribution(data) {
   });
 }
 
+export async function parseSubmissionText(text, submitterName) {
+  const res = await fetch(`${BASE}/submissions/parse-text`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, submitter_name: submitterName }),
+  });
+  if (res.status === 429) {
+    throw new Error('RATE_LIMIT');
+  }
+  if (res.status === 422) {
+    throw new Error('PARSE_FAILED');
+  }
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status}`);
+  }
+  return res.json();
+}
+
 export function checkSubmissionStatus(token) {
   return request(`/submissions/status/${token}`);
 }

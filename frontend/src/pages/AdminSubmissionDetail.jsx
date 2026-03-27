@@ -133,6 +133,15 @@ export default function AdminSubmissionDetail() {
           </div>
         )}
 
+        {submission.parse_feedback && (
+          <div className="mt-4">
+            <h3 className="text-sm font-medium text-stone-400 mb-1">Parser Feedback</h3>
+            <p className="text-sm text-stone-700 bg-amber-50 border border-amber-200 rounded-md p-3">
+              {submission.parse_feedback}
+            </p>
+          </div>
+        )}
+
         {submission.editor_notes && (
           <div className="mt-4">
             <h3 className="text-sm font-medium text-stone-400 mb-1">Editor Notes</h3>

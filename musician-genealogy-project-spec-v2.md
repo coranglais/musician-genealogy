@@ -727,12 +727,12 @@ A Claude API call (Haiku model) parses this into structured candidate records:
 
 The parsed records are shown back to the submitter as friendly, editable cards (NOT raw JSON). The submitter can fix errors, add details, or remove incorrect entries. Only after confirmation does the system create pending database records via the existing submission endpoint — same email verification, same pending/unverified flow, same admin review queue. There is one submission flow, not two.
 
-**UX design:** The `/submit` page has a segmented control at the top: "Describe it" (free-text, default) | "Fill in fields" (structured form). Switching modes preserves state in both — no data loss on toggle. Free-text mode has a "Start Over" button that clears parsed results but preserves the original text for revision. All failure modes (API down, rate limit, parse failure) offer the structured form as a fallback.
+**UX design:** The `/submit` page has a segmented control at the top: "Describe it" (free-text, default) | "Fill in fields" (structured form). Switching modes preserves state in both — no data loss on toggle. Free-text mode includes a collapsible "Tips for best results" section to guide users toward more complete input (full names, institutions, years, relationship type). Parsed results appear as editable cards with a disclaimer: "Our text parser is still learning." An optional "Anything we got wrong?" feedback box lets users report parsing errors — saved to a `parse_feedback` field on `submission_metadata` for pattern analysis and prompt improvement. Free-text mode has a "Start Over" button that clears parsed results but preserves the original text for revision. All failure modes (API down, rate limit, parse failure) offer the structured form as a fallback.
 
 Implementation:
 - Endpoint: POST /api/v1/submissions/parse-text
 - Input: free-text string (max 2000 chars) + submitter name
-- Calls Claude API (claude-haiku-4-5-20251001) with a system prompt that instructs extraction only. **The prompt does NOT contain the list of existing musicians/institutions.** Name matching is done server-side after parsing, using the existing pg_trgm fuzzy search pipeline. This keeps the prompt small (cheaper), eliminates the exfiltration target (more secure), and produces better matches (database search > LLM string matching).
+- Calls Claude API (claude-sonnet-4-6) with a system prompt that instructs extraction only. **The prompt does NOT contain the list of existing musicians/institutions.** Name matching is done server-side after parsing, using the existing pg_trgm fuzzy search pipeline. This keeps the prompt small (cheaper), eliminates the exfiltration target (more secure), and produces better matches (database search > LLM string matching). Sonnet chosen over Haiku for significantly better extraction quality — fewer hallucinated names, better understanding of cities vs institutions, better date parsing.
 - Claude returns JSON; server validates against a strict schema and discards anything that doesn't parse. Raw Claude output is never exposed to the user.
 - Server-side post-processing: fuzzy-match extracted names against musicians and institutions tables, attach existing IDs where matches are found, flag unmatched names as "new — will be created if approved."
 - Returns structured candidate records for submitter review as editable UI cards.
@@ -749,7 +749,7 @@ Prompt injection defenses:
 
 **Detailed implementation spec:** See `nl-submission-parsing-spec.md` for full backend implementation, prompt design, frontend wireframes, failure mode UX, and build order.
 
-Cost: Haiku is fractions of a cent per call. ~200 tokens in, ~300 out. Thousands of submissions for under a dollar.
+Cost: Sonnet 4.6 at ~$0.005-0.01 per call. Monthly: ~$2 (light, 10 calls/day), ~$10 (moderate, 50 calls/day).
 
 ### Admin Research Assistant
 
@@ -770,10 +770,9 @@ Cost: Slightly more per call than Haiku but used infrequently. Pennies per looku
 
 - Rate limit the public parse-text endpoint: 10 calls per IP per day
 - Rate limit the admin research endpoint: 50 calls per day total
-- Use Haiku for all public-facing AI features
-- Use Sonnet only for the admin research tool
+- Use Sonnet for both public parsing and admin research (extraction quality justifies the cost at expected volume)
 - API key stored as ANTHROPIC_API_KEY environment variable on Railway
-- Monthly cost at expected usage: well under $5
+- Monthly cost at expected usage: ~$2/month (light) to ~$10/month (moderate) for parse-text + negligible for admin research
 
 ### Architectural Principle
 

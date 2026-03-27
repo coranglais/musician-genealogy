@@ -72,6 +72,7 @@ def create_submission(
         submission_type="new_relationship",
         notes=body.notes,
         verification_info=body.verification_info,
+        parse_feedback=body.parse_feedback,
         verification_token=token,
         token_expires_at=expires_at,
         status="unverified",

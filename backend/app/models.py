@@ -165,6 +165,7 @@ class SubmissionMetadata(Base):
     notes = Column(Text, nullable=True)
     verification_info = Column(Text, nullable=True)
     original_text = Column(Text, nullable=True)
+    parse_feedback = Column(Text, nullable=True)
     verification_token = Column(String(100), nullable=True, unique=True, index=True)
     token_expires_at = Column(DateTime(timezone=True), nullable=True)
     verified_at = Column(DateTime(timezone=True), nullable=True)
