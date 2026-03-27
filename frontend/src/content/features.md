@@ -18,29 +18,37 @@ Unlike a family tree where everyone has exactly two parents, musicians often stu
 
 Musicians come from everywhere, and their names reflect it. Our search handles diacritical marks (search "Dvorak" and find Dvořák) and common misspellings. We don't punish you for not knowing exactly how to spell a Czech surname. *(Planned: support for multiple transliteration systems — Rachmaninoff, Rachmaninov, and Рахманинов will all find the same person.)*
 
-## Companion Instruments *(Planned)*
+## Companion Instruments
 
-An English hornist is really an oboist who doubles. A piccolo player is a flutist. Our instrument system will understand these companion relationships. Search for "oboe" and you'll find English horn players too. Browse flutists and piccolo specialists will be right there alongside them.
+An English hornist is really an oboist who doubles. A piccolo player is a flutist. Our instrument system understands these companion relationships. Search for "oboe" and you'll find English horn players too. Browse flutists and piccolo specialists are right there alongside them.
 
-## Institutions Change Their Names *(Planned)*
+## Beyond the Modern Orchestra
 
-The Paris Conservatoire has been called half a dozen things over the centuries. We will track historical names so that whether a source says "Conservatoire national de musique" or "CNSMDP," it all connects to the same place.
+Pedagogical lineages don't stop at modern instruments. We cover period instruments (baroque oboe, fortepiano, viola da gamba, natural horn, sackbut, and more) and traditional instruments (uilleann pipes, fiddle, bodhrán, Irish flute, and others). Each has its own distinct teaching tradition — a baroque oboist and a modern oboist may play related instruments, but their pedagogical lineages are separate worlds.
+
+## Institutions Change Their Names
+
+The Paris Conservatoire has been called half a dozen things over the centuries. We track historical names so that whether a source says "Conservatoire national de musique" or "CNSMDP," it all connects to the same place.
 
 ## Dates Are Messy — And That's OK
 
 Historical records don't always give you a neat birthday. Sometimes all you know is "born around 1820" or "active in the 1930s." We store dates as they actually appear in sources rather than forcing everything into a rigid format, so nothing gets lost or fabricated for the sake of a database field.
 
-## Community Contributions with Editorial Review
+## Community Contributions with Smart Parsing
 
-Anyone can suggest additions — tell us about your teachers, flag a missing connection, correct a date. But nothing goes live without an editor reviewing it first. This keeps the data trustworthy while making it easy for the community to contribute. *(Planned: an AI assistant that helps turn your plain-language description into structured data, so you can just write naturally about your education instead of filling in a complicated form.)*
+Anyone can suggest additions — tell us about your teachers, flag a missing connection, correct a date. You can describe your musical education in plain language ("I studied oboe with Richard Killmer at Eastman from 2001 to 2005") and our AI-powered parser will extract the details into structured records for you to review and correct before submitting. Or if you prefer, fill in the fields yourself. Either way, nothing goes live without an editor reviewing it first. This keeps the data trustworthy while making it easy for the community to contribute.
+
+## Find the Connection *(Planned)*
+
+Ever wondered how two musicians are connected? Pick any two people in the database and trace the shortest pedagogical path between them — discover that your teacher's teacher studied with the same person as your colleague's mentor. Six degrees of musical separation, mapped out.
 
 ## Built for Every Language *(Planned)*
 
 This is an international art form and the site will reflect that. We're working toward an interface that supports multiple languages, with institution names appearing in their appropriate form and search working across scripts.
 
-## Every Fact Has a Source *(Planned)*
+## Every Fact Has a Source
 
-Lineage data is only as good as its sourcing. We will track where each piece of information came from — whether it's a published biography, a concert program, a personal interview, or a community submission. You'll always be able to ask "how do we know this?"
+Lineage data is only as good as its sourcing. We track where each piece of information came from — whether it's a published biography, a concert program, a personal interview, or a community submission. You can always ask "how do we know this?"
 
 ## Open and Non-Commercial
 
