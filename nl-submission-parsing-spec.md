@@ -60,6 +60,8 @@ class CandidateLineage(BaseModel):
     teacher_first_name: str | None = None
     teacher_existing_id: int | None = None  # If matched to existing musician
     student_name: str  # Usually the submitter
+    instrument: str | None = None  # Instrument studied, if mentioned
+    instrument_existing_id: int | None = None  # If matched to existing instrument
     institution_name: str | None = None
     institution_existing_id: int | None = None  # If matched to existing institution
     relationship_type: str  # formal_study, masterclass, festival, etc.
@@ -67,6 +69,7 @@ class CandidateLineage(BaseModel):
     end_year: int | None = None
     notes: str | None = None
     confidence: str  # "high", "medium", "low"
+    inferred_fields: list[str] = []  # Field names where model assumed rather than extracted (e.g., ["relationship_type"])
 
 class CandidateMusician(BaseModel):
     name: str
@@ -78,9 +81,12 @@ class CandidateMusician(BaseModel):
 class ParseTextResponse(BaseModel):
     candidate_lineages: list[CandidateLineage]
     candidate_musicians: list[CandidateMusician]  # New musicians that would need to be created
+    submitter_instruments: list[str] = []  # Instruments the submitter mentions playing
     raw_text: str  # Echo back for audit trail
     parse_notes: str | None = None  # Any caveats from the parser
 ```
+
+**Instrument matching:** Server-side post-processing matches extracted instrument names against the instruments table (exact match or close fuzzy match). If matched, `instrument_existing_id` is populated. The `submitter_instruments` list is matched similarly. Instrument autocomplete on the review cards uses the same instruments endpoint as the rest of the site.
 
 ### Rate Limiting
 
@@ -180,6 +186,7 @@ records.
 Extract teacher-student relationships from the text below. For each
 relationship, identify:
 - Teacher name
+- Instrument studied (e.g., oboe, piano, violin — if mentioned)
 - Institution name (expand abbreviations ONLY for well-known music
   institutions, e.g., CIM → Cleveland Institute of Music,
   NEC → New England Conservatory)
@@ -187,6 +194,9 @@ relationship, identify:
   festival, masterclass, workshop, informal
 - Start year and end year if explicitly stated
 - Any notes about the relationship
+
+Also extract any instrument(s) the submitter mentions playing or studying,
+even if not tied to a specific relationship.
 
 The submitter's name is: {submitter_name}
 Unless stated otherwise, assume the submitter is the student in each
@@ -197,21 +207,31 @@ Return ONLY a JSON object matching this exact schema, with no other text:
   "lineages": [
     {
       "teacher_name": "Name exactly as given in text",
+      "instrument": "instrument name or null",
       "institution_name": "Full Institution Name or null",
       "relationship_type": "formal_study",
       "start_year": 1990,
       "end_year": 1994,
-      "notes": "any additional context or null"
+      "notes": "any additional context or null",
+      "inferred_fields": ["relationship_type"]
     }
   ],
+  "submitter_instruments": ["oboe"],
   "parse_notes": "any caveats about ambiguous or unclear information, or null"
 }
 
 Rules:
 - If the text does not contain any teacher-student relationships, return
-  {"lineages": [], "parse_notes": "No relationships found"}
+  {"lineages": [], "submitter_instruments": [], "parse_notes": "No relationships found"}
 - If information is ambiguous, include it with a note in parse_notes
 - Do not invent information not present in the text
+- For each lineage, include an "inferred_fields" array listing any field
+  names where you made an assumption rather than extracting an explicit
+  value from the text. For example, if the text says "studied with" but
+  does not specify whether it was at a conservatory or private lessons,
+  include "relationship_type" in inferred_fields. If the text explicitly
+  says "masterclass", relationship_type is NOT inferred. An empty array
+  means all fields were explicitly stated.
 - Extract ONLY names that appear in the text. If the text says "Holliger",
   return "Holliger" — do NOT expand to a full name unless the full name
   is explicitly stated. Never guess a first name.
@@ -298,20 +318,22 @@ On click, call `POST /api/v1/submissions/parse-text`. Show a loading state — t
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  Teacher:  [Richard Killmer      ] ✓ Matched        │
-│  School:   [Eastman School of Music] ✓ Matched      │
-│  Type:     [Formal Study ▾]                         │
-│  Years:    [2001] – [2005]                          │
-│  Notes:    [                     ]                   │
+│  Teacher:     [Richard Killmer      ] ✓ Matched     │
+│  Instrument:  [Oboe ▾              ] ✓ Matched      │
+│  School:      [Eastman School of Music] ✓ Matched   │
+│  Type:        [Formal Study ▾] ℹ️ assumed — correct?│
+│  Years:       [2001] – [2005]                       │
+│  Notes:       [                     ]                │
 │                                          [✕ Remove] │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
-│  Teacher:  [Heinz Holliger       ] ✓ Matched        │
-│  School:   [Lucerne Festival     ] ⚠ New            │
-│  Type:     [Masterclass ▾]                          │
-│  Years:    [    ] – [    ]                          │
-│  Notes:    [                     ]                   │
+│  Teacher:     [Holliger             ] ✓ Matched     │
+│  Instrument:  [Oboe ▾              ] ✓ Matched      │
+│  School:      [                     ]                │
+│  Type:        [Masterclass ▾]                       │
+│  Years:       [    ] – [    ]                       │
+│  Notes:       [in Bern, in the 1970s]               │
 │                                          [✕ Remove] │
 └─────────────────────────────────────────────────────┘
 
@@ -319,9 +341,11 @@ On click, call `POST /api/v1/submissions/parse-text`. Show a loading state — t
 ```
 
 Card details:
-- Teacher and Institution fields use the same autocomplete component as the structured form
+- Teacher, Institution, and Instrument fields use autocomplete against their respective tables
+- Instrument field: dropdown/autocomplete against the instruments table, with companion grouping (e.g., "English Horn (doubles Oboe)"). If the same instrument applies to all relationships, pre-fill from `submitter_instruments`. If not mentioned in the text, leave empty for the user to fill in.
 - Match indicator: "✓ Matched" (green, linked to existing record) or "⚠ New — will be created if approved" (amber)
 - Relationship type is a human-readable dropdown: "Formal Study", "Private Study", "Masterclass", etc. — NOT the internal codes
+- **Inferred field hints:** For any field listed in the `inferred_fields` array from the API response, show a small inline hint (e.g., ℹ️ icon + "assumed — correct?") next to that field. This draws attention to fields where the model guessed rather than extracted an explicit value. The hint is subtle — small text, muted color — so users who don't care can ignore it, but detail-oriented users get a nudge to verify. Only shown on fields that are actually inferred; most fields on most cards will have no hint.
 - All fields are editable — the user can correct anything the parser got wrong
 - Remove button (✕) deletes a card the user doesn't want
 - "+ Add another relationship" adds a blank card for anything the parser missed
@@ -331,6 +355,11 @@ Also show:
 - Parser notes if any (e.g., *"Note: 'summers' was interpreted as a festival — change the type if this was formal study"*)
 - The original text (collapsed/expandable, for reference)
 - **"Start Over" button** — clears all parsed results and returns to Step 1 with the original text still in the textarea, so the user can revise and re-parse
+
+**Human-readable labels everywhere:** The frontend must NEVER display raw database field names or internal codes to the user. All labels and values must use friendly display names:
+- `relationship_type` → "Relationship Type", `institution_name` → "School", `start_year` → "Start Year", etc.
+- `formal_study` → "Formal Study", `private_study` → "Private Lessons", `masterclass` → "Masterclass", `festival` → "Summer Festival", `apprenticeship` → "Apprenticeship", `workshop` → "Workshop", `informal` → "Informal Mentorship"
+- This applies to card labels, parse summary text, parse_notes, inferred field hints, and any error messages. If the model returns a field name in parse_notes (e.g., "relationship_type was inferred"), map it to friendly text before displaying.
 
 **Feedback box** — shown after the review cards, before the submission fields:
 
